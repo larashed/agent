@@ -68,7 +68,8 @@ class Request
     {
         $data = ['user_id' => 0];
         $user = $this->request->user(config('larashed.agent.auth.guard'));
-
+//        dd($user, \Auth::guard()->authenticate());
+//        dd($this->request->session());
         if (!is_null($user)) {
             $data['user_id'] = $user->getAuthIdentifier();
         }

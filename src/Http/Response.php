@@ -77,9 +77,10 @@ class Response
     public function toArray()
     {
         return [
-            'type'    => $this->getType(),
-            'content' => $this->getContent(),
-            'code'    => $this->getStatusCode()
+            'type'         => $this->getType(),
+            'content'      => $this->getContent(),
+            'code'         => $this->getStatusCode(),
+            'processed_in' => microtime(true) - LARAVEL_START
         ];
     }
 
