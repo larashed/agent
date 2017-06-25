@@ -2,6 +2,7 @@
 
 namespace Larashed\Agent\Http;
 
+use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use InvalidArgumentException;
@@ -80,7 +81,8 @@ class Response
             'type'         => $this->getType(),
             'content'      => $this->getContent(),
             'code'         => $this->getStatusCode(),
-            'processed_in' => microtime(true) - LARAVEL_START
+            'processed_in' => microtime(true) - LARAVEL_START,
+            'received_at'  => Carbon::now()->setTimezone('UTC')->toDateTimeString()
         ];
     }
 
