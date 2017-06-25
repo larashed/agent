@@ -19,6 +19,7 @@ class LarashedAgentServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->app[Agent::class]->boot();
+        $this->loadRoutesFrom(__DIR__ . '/routes.php');
     }
 
     /**
