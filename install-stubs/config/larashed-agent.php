@@ -5,7 +5,7 @@ return [
     'application_key' => env('LARASHED_APP_KEY'),
     'storage'         => [
         // file, database
-        'default' => 'database',
+        'default' => 'file',
         'engines' => [
             'file'     => [
                 'disk' => 'local'
