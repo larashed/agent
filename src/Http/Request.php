@@ -48,12 +48,14 @@ class Request
     protected function getRouteData()
     {
         $data = [];
-        $data['name'] = '';
-        $data['action'] = '';
+        $data['uri'] = null;
+        $data['name'] = null;
+        $data['action'] = null;
 
         $route = $this->request->route();
 
         if (!is_null($route)) {
+            $data['uri'] = $route->uri();
             $data['name'] = $route->getName();
             $data['action'] = $route->getActionName();
         }
@@ -68,8 +70,7 @@ class Request
     {
         $data = ['user_id' => 0];
         $user = $this->request->user(config('larashed.agent.auth.guard'));
-//        dd($user, \Auth::guard()->authenticate());
-//        dd($this->request->session());
+
         if (!is_null($user)) {
             $data['user_id'] = $user->getAuthIdentifier();
         }
