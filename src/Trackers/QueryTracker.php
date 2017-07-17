@@ -24,9 +24,9 @@ class QueryTracker extends BaseTracker
             }
 
             $data = [
-                'query'       => $query->sql,
-                'duration'    => $query->time,
-                'executed_at' => Carbon::now()->format('Y-m-d H:i:s')
+                'query'      => $query->sql,
+                'duration'   => $query->time,
+                'created_at' => Carbon::now()->format('Y-m-d H:i:s')
             ];
 
             $this->agent->getCollector()->addQuery($data);

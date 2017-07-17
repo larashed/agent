@@ -37,8 +37,8 @@ class JobTracker extends BaseTracker
     protected function render($event)
     {
         $meta = $event->job->larashedMetaData;
-        $meta['started_at'] = $this->toDate($meta['started_at']);
-        $meta['ended_at'] = $this->toDate(microtime(true));
+        $meta['created_at'] = $this->toDate($meta['started_at']);
+        $meta['duration'] = microtime(true) - $meta['started_at'];
         $meta['memory'] = memory_get_usage(false) - $meta['memory'];
 
         return $meta;

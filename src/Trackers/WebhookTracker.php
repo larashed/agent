@@ -20,10 +20,10 @@ class WebhookTracker extends BaseTracker
     public function capture(Request $request, $source = null, $name = null)
     {
         $webhook = [
-            'name'        => $name,
-            'source'      => $source,
-            'payload'     => $this->getPayload($request),
-            'received_at' => Carbon::now('UTC')->format('Y-m-d H:i:s')
+            'name'       => $name,
+            'source'     => $source,
+            'payload'    => $this->getPayload($request),
+            'created_at' => Carbon::now('UTC')->format('Y-m-d H:i:s')
         ];
 
         $this->agent->getCollector()->addWebhook($webhook);

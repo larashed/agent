@@ -16,12 +16,12 @@ use Illuminate\Http\RedirectResponse as LaravelRedirectResponse;
  */
 class Response
 {
-    const TYPE_EXCEPTION  = 'exception';
-    const TYPE_VIEW       = 'view';
+    const TYPE_EXCEPTION = 'exception';
+    const TYPE_VIEW = 'view';
     const TYPE_COLLECTION = 'collection';
-    const TYPE_ARRAY      = 'array';
-    const TYPE_REDIRECT   = 'redirect';
-    const TYPE_MIXED      = 'mixed';
+    const TYPE_ARRAY = 'array';
+    const TYPE_REDIRECT = 'redirect';
+    const TYPE_MIXED = 'mixed';
 
     /**
      * @var LaravelResponse|LaravelRedirectResponse
@@ -82,7 +82,7 @@ class Response
             'content'      => $this->getContent(),
             'code'         => $this->getStatusCode(),
             'processed_in' => microtime(true) - LARAVEL_START,
-            'received_at'  => Carbon::now()->setTimezone('UTC')->toDateTimeString()
+            'created_at'   => Carbon::now()->setTimezone('UTC')->toDateTimeString()
         ];
     }
 
@@ -143,7 +143,7 @@ class Response
     {
         switch ($type) {
             case self::TYPE_EXCEPTION:
-                return (string) $response->exception;
+                return (string)$response->exception;
             case self::TYPE_VIEW:
                 return $response->getOriginalContent()->getName();
             case self::TYPE_COLLECTION:
