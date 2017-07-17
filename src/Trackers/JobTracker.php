@@ -38,7 +38,7 @@ class JobTracker extends BaseTracker
     {
         $meta = $event->job->larashedMetaData;
         $meta['created_at'] = $this->toDate($meta['started_at']);
-        $meta['duration'] = microtime(true) - $meta['started_at'];
+        $meta['processed_in'] = (microtime(true) - $meta['started_at']) / 1000;
         $meta['memory'] = memory_get_usage(false) - $meta['memory'];
 
         return $meta;
