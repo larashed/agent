@@ -32,7 +32,12 @@ class LarashedAgentServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__ . '/../install-stubs/config/larashed-agent.php', 'larashed-agent');
 
         $this->app->singleton(LarashedApi::class, function () {
-            return new LarashedApi(config('larashed-agent.application_id'), config('larashed-agent.application_key'));
+            return new LarashedApi(
+                config('larashed-agent.application_id'),
+                config('larashed-agent.application_key'),
+                config('larashed-agent.url'),
+                config('larashed-agent.verify-ssl')
+            );
         });
 
         $this->app->singleton(Collector::class, function () {
