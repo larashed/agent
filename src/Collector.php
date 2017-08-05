@@ -176,7 +176,7 @@ class Collector
     public function getData()
     {
         $data = [
-            'environment' => env('APP_ENV', null)
+            'environment' => config('app.env')
         ];
 
         $data = array_merge($data, $this->records);
