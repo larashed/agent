@@ -12,7 +12,7 @@
   "minimum-stability": "dev",
   "require": {
     "php": ">=5.6.4",
-    "larashed/api": "*"
+    "larashed/api": "^0.1"
   },
   "autoload": {
     "psr-4": {
