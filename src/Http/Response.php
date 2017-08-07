@@ -8,6 +8,7 @@ use Illuminate\Support\Collection;
 use InvalidArgumentException;
 use Illuminate\Http\Response as LaravelResponse;
 use Illuminate\Http\RedirectResponse as LaravelRedirectResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
  * Class Response
@@ -98,8 +99,9 @@ class Response
         } elseif ($response instanceof LaravelRedirectResponse) {
             $this->type = self::TYPE_REDIRECT;
             $this->code = $response->getStatusCode();
-        } else {
-            throw new InvalidArgumentException('Invalid response object');
+        } elseif($response instanceof RedirectResponse) {
+            $this->type = self::TYPE_REDIRECT;
+            $this->code = $response->getStatusCode();
         }
     }
 
