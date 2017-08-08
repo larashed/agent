@@ -77,7 +77,8 @@ class Collector
     public function addFailedJob($job)
     {
         if ($this->failedJobLoggingEnabled) {
-            $this->records['failed_jobs'][] = $job;
+            $job['failed'] = 1;
+            $this->records['job'] = $job;
         }
 
         return $this;
