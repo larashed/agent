@@ -63,7 +63,7 @@ class Collector
     public function addJob($job)
     {
         if ($this->jobLoggingEnabled) {
-            $this->records['jobs'][] = $job;
+            $this->records['job'] = $job;
         }
 
         return $this;
