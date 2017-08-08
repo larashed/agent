@@ -195,4 +195,9 @@ class Collector
 
         return $count > 0;
     }
+
+    public function clearRecords()
+    {
+        $this->records = [];
+    }
 }

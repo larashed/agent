@@ -88,6 +88,8 @@ class Agent
     {
         $data = $this->collector->getData();
 
+        $this->collector->clearRecords();
+
         $this->storage->addRecord($data);
     }
 }
