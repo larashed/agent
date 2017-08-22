@@ -13,7 +13,7 @@ class LarashedSendCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'larashed:send {--daemon} {--sleep=3}';
+    protected $signature = 'larashed:send {--daemon} {--sleep=10}';
 
     /**
      * The console command description.
@@ -65,20 +65,26 @@ class LarashedSendCommand extends Command
         /** @var LarashedApi $api */
         $api = app(LarashedApi::class);
 
-        $records = $this->storage->getRecords();
+        $records = $this->storage->getRecords(100);
 
-        if ($records->count() > 0) {
-            $this->info('Got ' . $records->count() . ' records.');
+        if ($records->count() === 0) {
+            return;
         }
 
-        $records->each(function ($data, $identifier) use ($api) {
-            $response = $api->agent()->send(json_decode($data, true));
+        $this->info('Got ' . $records->count() . ' records.');
 
-            if ($response['success']) {
-                $this->storage->remove($identifier);
-            } else {
-                print_r($response);
-            }
-        });
+        $data = join("\n", $records->toArray());
+
+        $response = $api->agent()->send($data);
+
+        if ($response['success']) {
+            $this->storage->remove($records->keys()->toArray());
+
+            $this->info('Successfully sent '.strlen($data) . ' bytes of data.');
+
+            return;
+        }
+
+        $this->info('Failed to send collected data. Will try again.');
     }
 }

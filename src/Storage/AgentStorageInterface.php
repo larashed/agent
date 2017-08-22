@@ -6,7 +6,7 @@ interface AgentStorageInterface
 {
     public function addRecord($record);
 
-    public function getRecords();
+    public function getRecords($limit);
 
     public function remove($identifiers);
 }

@@ -50,14 +50,13 @@ class DatabaseStorage implements AgentStorageInterface
     }
 
     /**
-     * @param int $offset
      * @param int $limit
      *
      * @return \Illuminate\Support\Collection
      */
-    public function getRecords($offset = 0, $limit = 1000)
+    public function getRecords($limit = 1000)
     {
-        return $this->getTable()->limit(1000)->offset($offset)->get()->pluck('payload', 'id');
+        return $this->getTable()->limit($limit)->get()->pluck('payload', 'id');
     }
 
     /**

@@ -51,11 +51,13 @@ class FileStorage implements AgentStorageInterface
     }
 
     /**
-     * @return Collection
+     * @param int $limit
+     *
+     * @return static
      */
-    public function getRecords()
+    public function getRecords($limit = 1000)
     {
-        $files = collect($this->getDisk()->files($this->directory))->sort();
+        $files = collect($this->getDisk()->files($this->directory))->sort()->slice(0, $limit);
 
         $records = $files->map(function ($file) {
             $content = $this->getDisk()->get($file);
