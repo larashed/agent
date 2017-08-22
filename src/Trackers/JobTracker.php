@@ -37,8 +37,11 @@ class JobTracker extends BaseTracker
     protected function render($event)
     {
         $meta = $event->job->larashedMetaData;
+        $meta['connection'] = $event->connectionName;
+        $meta['queue'] = $event->job->getQueue();
         $meta['created_at'] = $this->toDate($meta['started_at']);
-        $meta['processed_in'] = (microtime(true) - $meta['started_at']) / 1000;
+        $meta['attempts'] = $event->job->attempts();
+        $meta['processed_in'] = round((microtime(true) - $meta['started_at']) * 1000, 2);
         $meta['memory'] = memory_get_usage(false) - $meta['memory'];
 
         return $meta;
