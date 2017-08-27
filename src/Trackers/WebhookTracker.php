@@ -23,7 +23,7 @@ class WebhookTracker extends BaseTracker
             'name'       => $name,
             'source'     => $source,
             'payload'    => $this->getPayload($request),
-            'created_at' => Carbon::now('UTC')->format('Y-m-d H:i:s')
+            'created_at' => Carbon::now('UTC')->format('c')
         ];
 
         $this->agent->getCollector()->addWebhook($webhook);
@@ -37,17 +37,10 @@ class WebhookTracker extends BaseTracker
     protected function getPayload(Request $request)
     {
         $payload = [
-            'ssl'          => $request->isSecure(),
-            'host'         => $request->getHost(),
-            'method'       => $request->getMethod(),
-            'path'         => $request->path(),
-            'query_string' => $request->getQueryString(),
-            'full_url'     => $request->fullUrl(),
-            'body'         => base64_encode($request->getContent()),
-            'headers'      => $this->getHeaders($request),
-            'cookies'      => [],
-            // we probably don't need this
-            // 'server'       => $request->server(),
+            'url'     => $request->fullUrl(),
+            'method'  => $request->getMethod(),
+            'body'    => base64_encode($request->getContent()),
+            'headers' => $this->getHeaders($request)
         ];
 
         return $payload;

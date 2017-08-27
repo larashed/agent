@@ -65,7 +65,7 @@ class LarashedSendCommand extends Command
         /** @var LarashedApi $api */
         $api = app(LarashedApi::class);
 
-        $records = $this->storage->getRecords(100);
+        $records = $this->storage->getRecords(1000);
 
         if ($records->count() === 0) {
             return;
@@ -79,6 +79,8 @@ class LarashedSendCommand extends Command
 
         if ($response['success']) {
             $this->storage->remove($records->keys()->toArray());
+
+            print_r($response);
 
             $this->info('Successfully sent '.strlen($data) . ' bytes of data.');
 

@@ -13,9 +13,9 @@ class JobTracker extends BaseTracker
     {
         Queue::before(function (JobProcessing $event) {
             $meta = [
-                'job_name'   => $event->job->resolveName(),
+                'name'       => $event->job->resolveName(),
                 'started_at' => microtime(true),
-                'memory'     => memory_get_usage(false),
+                'memory'     => memory_get_usage(false)
             ];
 
             $event->job->larashedMetaData = $meta;

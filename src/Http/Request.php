@@ -33,11 +33,11 @@ class Request
     {
         $data = [
             'url'    => $this->request->getUri(),
-            'method' => $this->request->getMethod()
+            'method' => $this->request->getMethod(),
+            'route'  => $this->getRouteData(),
+            'user'   => $this->getUserData(),
+            'meta'   => $this->getMetaData()
         ];
-
-        $data = array_merge($data, $this->getRouteData());
-        $data = array_merge($data, $this->getUserData());
 
         return $data;
     }
@@ -68,14 +68,26 @@ class Request
      */
     protected function getUserData()
     {
-        $data = ['user_id' => 0];
+        $data = ['id' => 0, 'name' => null];
         $user = $this->request->user(config('larashed.agent.auth.guard'));
 
         if (!is_null($user)) {
-            $data['user_id'] = $user->getAuthIdentifier();
+            $data['id'] = $user->getAuthIdentifier();
+            $data['name'] = data_get($user, 'name');
         }
 
         return $data;
     }
 
+    /**
+     * @return array
+     */
+    protected function getMetaData()
+    {
+        $headers['referrer'] = $this->request->header('referer');
+        $headers['user-agent'] = $this->request->header('user-agent');
+        $headers['ip'] = $this->request->getClientIp();
+
+        return $headers;
+    }
 }

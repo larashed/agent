@@ -63,6 +63,7 @@ class Collector
     public function addJob($job)
     {
         if ($this->jobLoggingEnabled) {
+            $job['failed'] = false;
             $this->records['job'] = $job;
         }
 
@@ -77,7 +78,7 @@ class Collector
     public function addFailedJob($job)
     {
         if ($this->failedJobLoggingEnabled) {
-            $job['failed'] = 1;
+            $job['failed'] = true;
             $this->records['job'] = $job;
         }
 
@@ -92,7 +93,7 @@ class Collector
     public function addWebhook($webhook)
     {
         if ($this->webhookLoggingEnabled) {
-            $this->records['webhooks'][] = $webhook;
+            $this->records['webhook'] = $webhook;
         }
 
         return $this;

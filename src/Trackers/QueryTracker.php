@@ -24,9 +24,10 @@ class QueryTracker extends BaseTracker
             }
 
             $data = [
+                'connection'   => $query->connectionName,
                 'query'        => $query->sql,
                 'processed_in' => $query->time,
-                'created_at'   => Carbon::now()->format('Y-m-d H:i:s')
+                'created_at'   => Carbon::now('UTC')->format('c')
             ];
 
             $this->agent->getCollector()->addQuery($data);
