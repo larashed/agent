@@ -80,8 +80,6 @@ class LarashedSendCommand extends Command
         if ($response['success']) {
             $this->storage->remove($records->keys()->toArray());
 
-            print_r($response);
-
             $this->info('Successfully sent '.strlen($data) . ' bytes of data.');
 
             return;
