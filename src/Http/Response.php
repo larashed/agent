@@ -17,12 +17,12 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
  */
 class Response
 {
-    const TYPE_EXCEPTION = 'exception';
-    const TYPE_VIEW = 'view';
+    const TYPE_EXCEPTION  = 'exception';
+    const TYPE_VIEW       = 'view';
     const TYPE_COLLECTION = 'collection';
-    const TYPE_ARRAY = 'array';
-    const TYPE_REDIRECT = 'redirect';
-    const TYPE_MIXED = 'mixed';
+    const TYPE_ARRAY      = 'array';
+    const TYPE_REDIRECT   = 'redirect';
+    const TYPE_MIXED      = 'mixed';
 
     /**
      * @var LaravelResponse|LaravelRedirectResponse
@@ -82,8 +82,8 @@ class Response
             'type'         => $this->getType(),
             'content'      => $this->getContent(),
             'code'         => $this->getStatusCode(),
-            'processed_in' => microtime(true) - LARAVEL_START,
-            'created_at'   => Carbon::now()->setTimezone('UTC')->toDateTimeString()
+            'processed_in' => round((microtime(true) - LARAVEL_START) * 1000, 2),
+            'created_at'   => Carbon::createFromTimestampUTC(LARAVEL_START)->format('c')
         ];
     }
 
@@ -99,7 +99,7 @@ class Response
         } elseif ($response instanceof LaravelRedirectResponse) {
             $this->type = self::TYPE_REDIRECT;
             $this->code = $response->getStatusCode();
-        } elseif($response instanceof RedirectResponse) {
+        } elseif ($response instanceof RedirectResponse) {
             $this->type = self::TYPE_REDIRECT;
             $this->code = $response->getStatusCode();
         }
@@ -145,7 +145,7 @@ class Response
     {
         switch ($type) {
             case self::TYPE_EXCEPTION:
-                return (string)$response->exception;
+                return (string) $response->exception;
             case self::TYPE_VIEW:
                 return $response->getOriginalContent()->getName();
             case self::TYPE_COLLECTION:

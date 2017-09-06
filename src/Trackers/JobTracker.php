@@ -2,6 +2,7 @@
 
 namespace Larashed\Agent\Trackers;
 
+use Carbon\Carbon;
 use Queue;
 use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Queue\Events\JobProcessed;
@@ -39,18 +40,11 @@ class JobTracker extends BaseTracker
         $meta = $event->job->larashedMetaData;
         $meta['connection'] = $event->connectionName;
         $meta['queue'] = $event->job->getQueue();
-        $meta['created_at'] = $this->toDate($meta['started_at']);
+        $meta['created_at'] = Carbon::createFromTimestampUTC($meta['started_at'])->format('c');
         $meta['attempts'] = $event->job->attempts();
         $meta['processed_in'] = round((microtime(true) - $meta['started_at']) * 1000, 2);
         $meta['memory'] = memory_get_usage(false) - $meta['memory'];
 
         return $meta;
-    }
-
-    protected function toDate($microtime)
-    {
-        $milliseconds = sprintf("%03d", ($microtime - floor($microtime)) * 1000);
-
-        return date('Y-m-d H:i:s.' . $milliseconds, $microtime);
     }
 }
