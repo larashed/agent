@@ -40,7 +40,7 @@ class JobTracker extends BaseTracker
         $meta = $event->job->larashedMetaData;
         $meta['connection'] = $event->connectionName;
         $meta['queue'] = $event->job->getQueue();
-        $meta['created_at'] = Carbon::createFromTimestampUTC($meta['started_at'])->format('c');
+        $meta['created_at'] = Carbon::createFromTimestampUTC(round($meta['started_at'], 0))->format('c');
         $meta['attempts'] = $event->job->attempts();
         $meta['processed_in'] = round((microtime(true) - $meta['started_at']) * 1000, 2);
         $meta['memory'] = memory_get_usage(false) - $meta['memory'];

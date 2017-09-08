@@ -83,7 +83,7 @@ class Response
             'content'      => $this->getContent(),
             'code'         => $this->getStatusCode(),
             'processed_in' => round((microtime(true) - LARAVEL_START) * 1000, 2),
-            'created_at'   => Carbon::createFromTimestampUTC(LARAVEL_START)->format('c')
+            'created_at'   => Carbon::createFromTimestampUTC(round(LARAVEL_START, 0))->format('c')
         ];
     }
 
