@@ -45,6 +45,7 @@ class JobTracker extends BaseTracker
         $meta['attempts'] = $event->job->attempts();
         $meta['processed_in'] = round((microtime(true) - $meta['started_at']) * 1000, 2);
         $meta['memory'] = memory_get_usage(false) - $meta['memory'];
+        $meta['exception'] = null;
 
         if (isset($event->exception)) {
             /** @var \Exception $exception */

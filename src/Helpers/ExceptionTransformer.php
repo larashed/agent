@@ -25,7 +25,7 @@ class ExceptionTransformer
     }
 
     /**
-     * @return \Exception
+     * @return array
      */
     public function toArray()
     {
@@ -34,15 +34,31 @@ class ExceptionTransformer
             'code'    => $this->exception->getCode(),
             'file'    => $this->exception->getFile(),
             'line'    => $this->exception->getLine(),
-            'trace'   => $this->exception->getTrace()
+            'trace'   => $this->getTraceLines()
         ];
 
         $previous = $this->exception->getPrevious();
 
         if (!is_null($previous)) {
-            $result['previous'] = new static($previous);
+            $result['previous'] = (new static($previous))->toArray();
         }
 
-        return $previous;
+        return $result;
+    }
+
+    protected function getTraceLines()
+    {
+        $lines = [];
+
+        collect($this->exception->getTrace())->each(function ($trace) use (&$lines) {
+            $line = array_only($trace, ['file', 'line', 'function', 'class']);
+            $lines[] = $line;
+
+            if (str_contains(array_get($line, 'class'), ['App\Http\Controllers', 'App\Jobs'])) {
+                return false;
+            }
+        });
+
+        return $lines;
     }
 }

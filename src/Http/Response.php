@@ -41,6 +41,11 @@ class Response
     protected $code;
 
     /**
+     * @var array
+     */
+    protected $exception;
+
+    /**
      * Response constructor.
      *
      * @param $response
@@ -75,17 +80,28 @@ class Response
     }
 
     /**
+     * @return mixed
+     */
+    public function getException()
+    {
+        return $this->exception;
+    }
+
+    /**
      * @return array
      */
     public function toArray()
     {
-        return [
+        $response = [
             'type'         => $this->getType(),
             'content'      => $this->getContent(),
             'code'         => $this->getStatusCode(),
+            'exception'    => $this->getException(),
             'processed_in' => round((microtime(true) - LARAVEL_START) * 1000, 2),
             'created_at'   => Carbon::createFromTimestampUTC(round(LARAVEL_START, 0))->format('c')
         ];
+
+        return $response;
     }
 
     /**
@@ -97,6 +113,9 @@ class Response
             $this->type = $this->getContentType($response);
             $this->content = $this->getResponseContent($response, $this->type);
             $this->code = $response->getStatusCode();
+            if (!is_null($response->exception)) {
+                $this->exception = (new ExceptionTransformer($response->exception))->toArray();
+            }
         } elseif ($response instanceof LaravelRedirectResponse) {
             $this->type = self::TYPE_REDIRECT;
             $this->code = $response->getStatusCode();
@@ -145,12 +164,10 @@ class Response
     protected function getResponseContent(LaravelResponse $response, $type)
     {
         switch ($type) {
-            case self::TYPE_EXCEPTION:
-                return (new ExceptionTransformer($response->exception))->toArray();
-
             case self::TYPE_VIEW:
                 return $response->getOriginalContent()->getName();
 
+            case self::TYPE_EXCEPTION:
             case self::TYPE_COLLECTION:
             case self::TYPE_ARRAY:
             case self::TYPE_MIXED:
