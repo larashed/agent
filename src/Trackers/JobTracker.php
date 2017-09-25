@@ -3,6 +3,7 @@
 namespace Larashed\Agent\Trackers;
 
 use Carbon\Carbon;
+use Larashed\Agent\Helpers\ExceptionTransformer;
 use Queue;
 use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Queue\Events\JobProcessed;
@@ -44,6 +45,12 @@ class JobTracker extends BaseTracker
         $meta['attempts'] = $event->job->attempts();
         $meta['processed_in'] = round((microtime(true) - $meta['started_at']) * 1000, 2);
         $meta['memory'] = memory_get_usage(false) - $meta['memory'];
+
+        if (isset($event->exception)) {
+            /** @var \Exception $exception */
+            $exception = $event->exception;
+            $meta['exception'] = (new ExceptionTransformer($exception))->toArray();
+        }
 
         return $meta;
     }

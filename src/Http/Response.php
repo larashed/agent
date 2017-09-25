@@ -8,6 +8,7 @@ use Illuminate\Support\Collection;
 use InvalidArgumentException;
 use Illuminate\Http\Response as LaravelResponse;
 use Illuminate\Http\RedirectResponse as LaravelRedirectResponse;
+use Larashed\Agent\Helpers\ExceptionTransformer;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
@@ -145,15 +146,13 @@ class Response
     {
         switch ($type) {
             case self::TYPE_EXCEPTION:
-                return (string) $response->exception;
+                return (new ExceptionTransformer($response->exception))->toArray();
+
             case self::TYPE_VIEW:
                 return $response->getOriginalContent()->getName();
+
             case self::TYPE_COLLECTION:
-                // return $response->getOriginalContent()->toArray();
-                return null;
             case self::TYPE_ARRAY:
-                // return $response->getOriginalContent();
-                return null;
             case self::TYPE_MIXED:
                 return null;
         }
