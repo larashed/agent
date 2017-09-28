@@ -30,6 +30,7 @@ class ExceptionTransformer
     public function toArray()
     {
         $result = [
+            'class'   => get_class($this->exception),
             'message' => $this->exception->getMessage(),
             'code'    => $this->exception->getCode(),
             'file'    => $this->exception->getFile(),
