@@ -5,6 +5,7 @@ namespace Larashed\Agent\Commands;
 use Illuminate\Console\Command;
 use Larashed\Agent\Storage\StorageFactory;
 use Larashed\Api\LarashedApi;
+use Exception;
 
 class LarashedSendCommand extends Command
 {
@@ -75,16 +76,23 @@ class LarashedSendCommand extends Command
 
         $data = join("\n", $records->toArray());
 
-        $response = $api->agent()->send($data);
-
-        if ($response['success']) {
-            $this->storage->remove($records->keys()->toArray());
-
-            $this->info('Successfully sent '.strlen($data) . ' bytes of data.');
+        try {
+            $response = $api->agent()->send($data);
+        } catch (Exception $exception) {
+            $this->error('Failed to send due to API error. Will try later.');
+            $this->error('Error: ' . $exception->getMessage());
 
             return;
         }
 
-        $this->info('Failed to send collected data. Will try again.');
+        if ($response['success'] == true) {
+            $this->storage->remove($records->keys()->toArray());
+
+            $this->info('Successfully sent ' . strlen($data) . ' bytes of data.');
+
+            return;
+        }
+
+        $this->error('Failed to send collected data. Will try again.');
     }
 }
