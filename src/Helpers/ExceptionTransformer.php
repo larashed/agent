@@ -29,7 +29,9 @@ class ExceptionTransformer
      */
     public function toArray()
     {
-        $result = [
+        $exceptions = [];
+
+        $exceptions[] = [
             'class'   => get_class($this->exception),
             'message' => $this->exception->getMessage(),
             'code'    => $this->exception->getCode(),
@@ -41,10 +43,13 @@ class ExceptionTransformer
         $previous = $this->exception->getPrevious();
 
         if (!is_null($previous)) {
-            $result['previous'] = (new static($previous))->toArray();
+            $exceptions = array_merge(
+                $exceptions,
+                (new static($previous))->toArray()
+            );
         }
 
-        return $result;
+        return $exceptions;
     }
 
     protected function getTraceLines()
