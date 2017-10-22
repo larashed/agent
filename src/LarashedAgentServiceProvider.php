@@ -19,7 +19,14 @@ class LarashedAgentServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->app[Agent::class]->boot();
-        $this->loadRoutesFrom(__DIR__ . '/routes.php');
+
+        if (version_compare($this->app->version(), '5.3.0', 'lt')) {
+            if (!$this->app->routesAreCached()) {
+                require __DIR__ . '/routes.php';
+            }
+        } else {
+            $this->loadRoutesFrom(__DIR__ . '/routes.php');
+        }
     }
 
     /**
