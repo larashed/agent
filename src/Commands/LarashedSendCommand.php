@@ -14,7 +14,7 @@ class LarashedSendCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'larashed:send {--daemon} {--sleep=10}';
+    protected $signature = 'larashed:send {--daemon} {--sleep=10} {--limit=200}';
 
     /**
      * The console command description.
@@ -66,13 +66,12 @@ class LarashedSendCommand extends Command
         /** @var LarashedApi $api */
         $api = app(LarashedApi::class);
 
-        $records = $this->storage->getRecords(1000);
+        $limit = $this->option('limit');
+        $records = $this->storage->getRecords((int) $limit);
 
         if ($records->count() === 0) {
             return;
         }
-
-        $this->info('Got ' . $records->count() . ' records.');
 
         $data = join("\n", $records->toArray());
 
@@ -88,7 +87,7 @@ class LarashedSendCommand extends Command
         if ($response['success'] == true) {
             $this->storage->remove($records->keys()->toArray());
 
-            $this->info('Successfully sent ' . strlen($data) . ' bytes of data.');
+            $this->info('Successfully sent ('.$records->count().' records) ' . strlen($data) . ' bytes of data.');
 
             return;
         }
