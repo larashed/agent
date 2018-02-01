@@ -1,5 +1,5 @@
 <?php
 
-Route::get('larashed/health-check', function () {
-    return response('OK', 200);
+Route::group(['namespace' => '\Larashed\Agent\Http\Controllers'], function() {
+    Route::get('larashed/health-check', 'LarashedController@healthCheck');
 });
