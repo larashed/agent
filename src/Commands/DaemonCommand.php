@@ -7,21 +7,21 @@ use Larashed\Agent\Storage\StorageFactory;
 use Larashed\Api\LarashedApi;
 use Exception;
 
-class LarashedSendCommand extends Command
+class DaemonCommand extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'larashed:send {--daemon : Deprecated, runs as daemon} {--single-run : Run the agent only once} {--sleep=10} {--limit=200}';
+    protected $signature = 'larashed:daemon {--single-run : Run the agent only once} {--sleep=10} {--limit=200}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Sends collected application data to Larashed service';
 
     /**
      * @var \Larashed\Agent\Storage\AgentStorageInterface
