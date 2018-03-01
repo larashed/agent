@@ -14,7 +14,7 @@ class LarashedSendCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'larashed:send {--daemon} {--sleep=10} {--limit=200}';
+    protected $signature = 'larashed:send {--daemon : Deprecated, runs as daemon} {--single-run : Run the agent only once} {--sleep=10} {--limit=200}';
 
     /**
      * The console command description.
@@ -49,7 +49,7 @@ class LarashedSendCommand extends Command
             return;
         }
 
-        if ($this->option('daemon')) {
+        if (!$this->option('single-run')) {
             while ( true ) {
                 $this->send();
                 sleep($this->option('sleep'));
