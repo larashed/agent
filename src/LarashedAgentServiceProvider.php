@@ -2,11 +2,11 @@
 
 namespace Larashed\Agent;
 
-use App\Console\Commands\DeployCommand;
 use Larashed\Api\LarashedApi;
 use Illuminate\Support\ServiceProvider;
 use Larashed\Agent\Storage\StorageFactory;
 use Larashed\Agent\Storage\AgentStorageInterface;
+use Larashed\Agent\Commands\DeployCommand;
 use Larashed\Agent\Commands\DaemonCommand;
 use Larashed\Agent\Http\Middlewares\TrackRequests;
 

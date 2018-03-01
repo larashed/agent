@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace Larashed\Agent\Commands;
 
 use Illuminate\Console\Command;
 
