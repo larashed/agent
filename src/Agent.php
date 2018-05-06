@@ -2,9 +2,8 @@
 
 namespace Larashed\Agent;
 
-use Larashed\Agent\Storage\AgentStorageInterface;
-use Larashed\Agent\Trackers\JobTracker;
-use Larashed\Agent\Trackers\QueryTracker;
+use Larashed\Agent\Storage\StorageInterface;
+use Larashed\Agent\Trackers\TrackerInterface;
 
 /**
  * Class Agent
@@ -14,82 +13,60 @@ use Larashed\Agent\Trackers\QueryTracker;
 class Agent
 {
     /**
-     * @var AgentStorageInterface
+     * @var StorageInterface
      */
     protected $storage;
 
     /**
-     * @var Collector
+     * @var TrackerInterface[]
      */
-    protected $collector;
-
-    /**
-     * @var array
-     */
-    protected $trackers = [
-        JobTracker::class,
-        QueryTracker::class
-    ];
+    protected $trackers;
 
     /**
      * Agent constructor.
      *
-     * @param AgentStorageInterface $storage
-     * @param Collector             $collector
+     * @param StorageInterface $storage
      */
-    public function __construct(AgentStorageInterface $storage, Collector $collector)
+    public function __construct(StorageInterface $storage)
     {
         $this->storage = $storage;
-        $this->collector = $collector;
     }
 
     /**
-     * @return Collector
-     */
-    public function getCollector()
-    {
-        return $this->collector;
-    }
-
-    /**
-     * @return AgentStorageInterface
-     */
-    public function getStorage()
-    {
-        return $this->storage;
-    }
-
-    /**
-     *  Bind application component trackers
-     */
-    public function boot()
-    {
-        foreach ($this->trackers as $tracker) {
-            $jobs = new $tracker($this);
-            $jobs->bind();
-        }
-    }
-
-    /**
-     * Set request and response data
+     * @param string           $name
+     * @param TrackerInterface $tracker
      *
-     * @param $request
-     * @param $response
+     * @return $this
      */
-    public function trackHttpData($request, $response)
+    public function addTracker($name, TrackerInterface $tracker)
     {
-        $this->collector->setRequest($request)->setResponse($response);
+        $this->trackers[$name] = $tracker;
+
+        return $this;
     }
 
     /**
-     * Store collected data using the selected storage engine
+     * Starts tracking
      */
-    public function terminate()
+    public function start()
     {
-        $data = $this->collector->getData();
+        collect($this->trackers)->each(function (TrackerInterface $tracker) {
+            $tracker->bind();
+        });
+    }
 
-        $this->collector->clearRecords();
+    /**
+     * Stops tracking and stores collected data
+     */
+    public function stop()
+    {
+        $data = [];
 
-        $this->storage->addRecord($data);
+        collect($this->trackers)->each(function (TrackerInterface $tracker, $name) use (&$data) {
+            $data[$name] = $tracker->gather();
+            $tracker->cleanup();
+        });
+
+        $this->storage->push($data);
     }
 }
