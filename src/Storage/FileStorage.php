@@ -2,16 +2,15 @@
 
 namespace Larashed\Agent\Storage;
 
-use Illuminate\Contracts\Support\Jsonable;
-use Illuminate\Filesystem\FilesystemManager;
 use Illuminate\Support\Collection;
+use Illuminate\Filesystem\FilesystemManager;
 
 /**
  * Class FileStorage
  *
  * @package Larashed\Agent\Storage
  */
-class FileStorage implements AgentStorageInterface
+class FileStorage implements StorageInterface
 {
     /**
      * @var FilesystemManager
@@ -43,9 +42,9 @@ class FileStorage implements AgentStorageInterface
     }
 
     /**
-     * @param $record
+     * @param array $record
      */
-    public function addRecord($record)
+    public function push(array $record)
     {
         $this->getDisk()->put($this->getFileName(), json_encode($record));
     }
@@ -53,18 +52,17 @@ class FileStorage implements AgentStorageInterface
     /**
      * @param int $limit
      *
-     * @return static
+     * @return Collection
      */
-    public function getRecords($limit = 1000)
+    public function records($limit = 1000)
     {
-        $files = collect($this->getDisk()->files($this->directory))->sort()->slice(0, $limit);
+        $files = $this->getDisk()->files($this->directory);
+        $files = collect($files)
+            ->sort()
+            ->slice(0, $limit);
 
         $records = $files->map(function ($file) {
             $content = $this->getDisk()->get($file);
-
-            if (empty($content)) {
-                return null;
-            }
 
             return [
                 'file'    => $file,
@@ -76,9 +74,9 @@ class FileStorage implements AgentStorageInterface
     }
 
     /**
-     * @param $identifiers
+     * @param array $identifiers
      */
-    public function remove($identifiers)
+    public function remove(array $identifiers)
     {
         $identifiers = (array) $identifiers;
 
