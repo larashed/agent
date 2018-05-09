@@ -3,7 +3,11 @@
   "description": "Larashed - application monitoring agent",
   "type": "library",
   "homepage": "https://larashed.com",
-  "keywords": ["laravel", "monitoring", "agent"],
+  "keywords": [
+    "laravel",
+    "monitoring",
+    "agent"
+  ],
   "license": "MIT",
   "authors": [
     {
@@ -17,7 +21,6 @@
   ],
   "minimum-stability": "dev",
   "require": {
-    "php": ">=5.6.4",
     "larashed/api": "^0.1",
     "laravel/framework": "5.2.*"
   },
