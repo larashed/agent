@@ -79,15 +79,11 @@ class AgentServiceProvider extends ServiceProvider
      */
     protected function loadRoutes()
     {
-        if (version_compare($this->app->version(), '5.3.0', 'lt')) {
-            if (!$this->app->routesAreCached()) {
-                require __DIR__ . '/routes.php';
+        if (!$this->app->routesAreCached()) {
+            require __DIR__ . '/routes.php';
 
-                return;
-            }
+            return;
         }
-
-        $this->loadRoutesFrom(__DIR__ . '/routes.php');
     }
 
     /**

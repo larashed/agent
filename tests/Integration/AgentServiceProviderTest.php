@@ -7,6 +7,7 @@ use Larashed\Agent\Agent;
 use Larashed\Agent\AgentServiceProvider;
 use Larashed\Agent\Http\Middlewares\RequestTrackerMiddleware;
 use Larashed\Agent\Storage\StorageInterface;
+use Larashed\Agent\Tests\Helpers\LaravelVersion;
 use Larashed\Api\LarashedApi;
 use Orchestra\Testbench\TestCase;
 
@@ -23,9 +24,9 @@ class AgentServiceProviderTest extends TestCase
             $agentStartCalled = true;
         });
 
-        app()->singleton(Agent::class, $agent);
+        $this->app->singleton(Agent::class, $agent);
 
-        $sp = new AgentServiceProvider(app());
+        $sp = new AgentServiceProvider($this->app);
         $sp->boot();
 
         $this->assertFalse($agentStartCalled);
@@ -42,11 +43,11 @@ class AgentServiceProviderTest extends TestCase
             $agentStartCalled = true;
         });
 
-        app()->singleton(Agent::class, function () use ($agent) {
+        $this->app->singleton(Agent::class, function () use ($agent) {
             return $agent;
         });
 
-        $sp = new AgentServiceProvider(app());
+        $sp = new AgentServiceProvider($this->app);
         $sp->boot();
 
         $this->assertTrue($agentStartCalled);
@@ -56,15 +57,15 @@ class AgentServiceProviderTest extends TestCase
     {
         app('config')->set('larashed.enabled', false);
 
-        $sp = new AgentServiceProvider(app());
+        $sp = new AgentServiceProvider($this->app);
         $sp->register();
 
         $commands = array_keys(Artisan::all());
 
-        $this->assertFalse(app()->has(StorageInterface::class));
-        $this->assertFalse(app()->has(LarashedApi::class));
-        $this->assertFalse(app()->has(Agent::class));
-        $this->assertFalse(app()->has(RequestTrackerMiddleware::class));
+        $this->assertFalse($this->containerHas(StorageInterface::class));
+        $this->assertFalse($this->containerHas(LarashedApi::class));
+        $this->assertFalse($this->containerHas(Agent::class));
+        $this->assertFalse($this->containerHas(RequestTrackerMiddleware::class));
 
         $this->assertFalse(in_array('larashed:daemon', $commands));
         $this->assertFalse(in_array('larashed:deploy', $commands));
@@ -75,18 +76,23 @@ class AgentServiceProviderTest extends TestCase
     {
         app('config')->set('larashed.enabled', true);
 
-        $sp = new AgentServiceProvider(app());
+        $sp = new AgentServiceProvider($this->app);
         $sp->register();
 
         $commands = array_keys(Artisan::all());
 
-        $this->assertTrue(app()->has(StorageInterface::class));
-        $this->assertTrue(app()->has(LarashedApi::class));
-        $this->assertTrue(app()->has(Agent::class));
-        $this->assertTrue(app()->has(RequestTrackerMiddleware::class));
+        $this->assertTrue($this->containerHas(StorageInterface::class));
+        $this->assertTrue($this->containerHas(LarashedApi::class));
+        $this->assertTrue($this->containerHas(Agent::class));
+        $this->assertTrue($this->containerHas(RequestTrackerMiddleware::class));
 
         $this->assertTrue(in_array('larashed:daemon', $commands));
         $this->assertTrue(in_array('larashed:deploy', $commands));
         $this->assertTrue(in_array('larashed:server', $commands));
+    }
+
+    protected function containerHas($class)
+    {
+        return $this->app->bound($class);
     }
 }

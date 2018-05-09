@@ -4,7 +4,7 @@ namespace Larashed\Agent\Trackers;
 
 use Closure;
 use Illuminate\Support\Facades\Queue;
-use Illuminate\Queue\Events\JobFailed;
+use Illuminate\Queue\Events\JobExceptionOccurred;
 use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
 use Larashed\Agent\Agent;
@@ -52,7 +52,7 @@ class QueueJobTracker implements TrackerInterface
     {
         Queue::before($this->onJobStartCallback());
         Queue::after($this->onJobEndCallback());
-        Queue::failing($this->onJobFailureCallback());
+        Queue::exceptionOccurred($this->onJobFailureCallback());
     }
 
     /**
@@ -115,7 +115,7 @@ class QueueJobTracker implements TrackerInterface
      */
     protected function onJobFailureCallback()
     {
-        return function (JobFailed $event) {
+        return function (JobExceptionOccurred $event) {
             $this->job->finalize($event->connectionName, $event->exception);
             $this->agent->stop();
         };
