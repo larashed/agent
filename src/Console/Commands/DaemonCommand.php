@@ -4,7 +4,7 @@ namespace Larashed\Agent\Console\Commands;
 
 use Exception;
 use Larashed\Agent\Console\Sender;
-use Larashed\Api\LarashedApi;
+use Larashed\Agent\Api\LarashedApi;
 use Larashed\Agent\Storage\StorageInterface;
 use Illuminate\Console\Command;
 

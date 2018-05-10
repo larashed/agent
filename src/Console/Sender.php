@@ -5,7 +5,7 @@ namespace Larashed\Agent\Console;
 use Exception;
 use Illuminate\Support\Collection;
 use Larashed\Agent\Storage\StorageInterface;
-use Larashed\Api\LarashedApi;
+use Larashed\Agent\Api\LarashedApi;
 
 /**
  * Class Reporter
@@ -52,7 +52,7 @@ class Sender
         $data = join("\n", $records->toArray());
 
         try {
-            $response = $this->api->agent()->send($data);
+            $response = $this->api->sendAgentData($data);
 
             return $this->removeRecordsIfSendingSucceeded($records, $response);
         } catch (Exception $exception) {

@@ -17,8 +17,6 @@
   ],
   "minimum-stability": "dev",
   "require": {
-    "php": ">=5.5.9",
-    "larashed/api": "^0.1",
     "laravel/framework": "5.2.*"
   },
   "require-dev": {

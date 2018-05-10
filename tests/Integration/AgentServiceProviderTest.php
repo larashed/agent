@@ -8,7 +8,7 @@ use Larashed\Agent\AgentServiceProvider;
 use Larashed\Agent\Http\Middlewares\RequestTrackerMiddleware;
 use Larashed\Agent\Storage\StorageInterface;
 use Larashed\Agent\Tests\Helpers\LaravelVersion;
-use Larashed\Api\LarashedApi;
+use Larashed\Agent\Api\LarashedApi;
 use Orchestra\Testbench\TestCase;
 
 class AgentServiceProviderTest extends TestCase
