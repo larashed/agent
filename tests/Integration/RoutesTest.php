@@ -2,6 +2,8 @@
 
 namespace Larashed\Agent\Tests\Integration;
 
+use Illuminate\Http\Response;
+use Larashed\Agent\Tests\Helpers\LaravelVersion;
 use Orchestra\Testbench\TestCase;
 use Illuminate\Support\Facades\Route;
 use Larashed\Agent\Http\Controllers\HealthCheckController;
@@ -25,7 +27,7 @@ class RoutesTest extends TestCase
     public function testHealthCheckRouteReturnOk()
     {
         $response = $this->call('get', '/larashed/health-check');
-        $response->assertSuccessful();
-        $response->assertSee('ok');
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertContains('ok', $response->getContent());
     }
 }

@@ -68,18 +68,18 @@ class SystemEnvironmentCollector
         $output = $this->system->fileContents('/etc/os-release');
 
         $lines = collect(explode("\n", $output));
-        $values = $lines->mapWithKeys(function ($line) {
+        $values = collect([]);
+
+        foreach ($lines as $line) {
             $line = trim($line);
 
             if (preg_match('/([A-Z_]+)=(.*)/', $line, $matches)) {
                 $key = strtolower($matches[1]);
                 $value = str_replace('"', '', $matches[2]);
 
-                return [$key => $value];
+                $values[$key] = $value;
             }
-
-            return [];
-        });
+        }
 
         $os = [];
         $os['id'] = $values->get('id');

@@ -2,12 +2,11 @@
 
 namespace Larashed\Agent;
 
-use Illuminate\Support\Facades\Route;
-use Larashed\Agent\Storage\StorageInterface;
-use Larashed\Agent\Trackers\ServerEnvironmentTracker;
-use Larashed\Api\LarashedApi;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Contracts\Http\Kernel as HttpKernel;
+use Larashed\Agent\Api\Config;
+use Larashed\Agent\Api\LarashedApi;
+use Larashed\Agent\Storage\StorageInterface;
 use Larashed\Agent\Storage\FileStorage;
 use Larashed\Agent\Trackers\DatabaseQueryTracker;
 use Larashed\Agent\Trackers\HttpRequestTracker;
@@ -79,15 +78,11 @@ class AgentServiceProvider extends ServiceProvider
      */
     protected function loadRoutes()
     {
-        if (version_compare($this->app->version(), '5.3.0', 'lt')) {
-            if (!$this->app->routesAreCached()) {
-                require __DIR__ . '/routes.php';
+        if (!$this->app->routesAreCached()) {
+            require __DIR__ . '/routes.php';
 
-                return;
-            }
+            return;
         }
-
-        $this->loadRoutesFrom(__DIR__ . '/routes.php');
     }
 
     /**
@@ -110,10 +105,12 @@ class AgentServiceProvider extends ServiceProvider
     {
         return function () {
             return new LarashedApi(
-                config('larashed-agent.application_id'),
-                config('larashed-agent.application_key'),
-                config('larashed-agent.url'),
-                config('larashed-agent.verify-ssl')
+                new Config(
+                    config('larashed-agent.application_id'),
+                    config('larashed-agent.application_key'),
+                    config('larashed-agent.url'),
+                    config('larashed-agent.verify-ssl')
+                )
             );
         };
     }

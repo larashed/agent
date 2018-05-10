@@ -5,7 +5,7 @@ namespace Larashed\Agent\Tests\Unit\Console;
 use Larashed\Agent\Console\Sender;
 use Larashed\Agent\Storage\StorageInterface;
 use Larashed\Api\Endpoints\Agent;
-use Larashed\Api\LarashedApi;
+use Larashed\Agent\Api\LarashedApi;
 use Orchestra\Testbench\TestCase;
 
 class SenderTest extends TestCase
@@ -56,15 +56,12 @@ class SenderTest extends TestCase
         $storage->shouldReceive('records')->andReturn(collect($records));
         $storage->shouldReceive('remove')->andReturn();
 
-        $endpoint = \Mockery::mock(Agent::class);
-        if (is_null($exception)) {
-            $endpoint->shouldReceive('send')->andReturn($response);
-        } else {
-            $endpoint->shouldReceive('send')->andThrows($exception);
-        }
-
         $api = \Mockery::mock(LarashedApi::class);
-        $api->shouldReceive('agent')->andReturn($endpoint);
+        if (is_null($exception)) {
+            $api->shouldReceive('sendAgentData')->andReturn($response);
+        } else {
+            $api->shouldReceive('sendAgentData')->andThrows($exception);
+        }
 
         $sender = new Sender($storage, $api);
 

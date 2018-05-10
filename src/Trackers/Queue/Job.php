@@ -51,11 +51,6 @@ class Job
     protected $queue;
 
     /**
-     * @var array
-     */
-    protected $exception;
-
-    /**
      * Job constructor.
      *
      * @param Measurements $measurements
@@ -108,7 +103,7 @@ class Job
      */
     protected function setAttributes(JobContract $job)
     {
-        $this->name = $job->resolveName();
+        $this->name = $job->getName();
         $this->attempts = $job->attempts();
         $this->setStartedAt($this->measurements->microtime());
         $this->setCreatedAt($this->measurements->time());

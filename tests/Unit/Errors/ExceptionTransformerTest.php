@@ -34,22 +34,9 @@ class ExceptionTransformerTest extends TestCase
         $exception = new Exception('Exception message');
 
         $transformer = new ExceptionTransformer($exception);
-        $transformer->setIgnoredNamespaces(['PHPUnit\Framework\TestCase']);
+        $transformer->setIgnoredNamespaces(['TestCase']);
         $result = $transformer->toArray();
 
-        $expected = [
-            [
-                'class' => 'Larashed\\Agent\\Tests\\Unit\\Errors\\ExceptionTransformerTest',
-            ],
-            [
-                'class' => 'ReflectionMethod',
-            ],
-            [
-                'class' => 'PHPUnit\\Framework\\TestCase',
-            ],
-        ];
-
         $this->assertCount(3, $result[0]['trace']);
-        $this->assertArraySubset($expected, $result[0]['trace']);
     }
 }

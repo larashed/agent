@@ -2,7 +2,7 @@
 
 namespace Larashed\Agent\Trackers\Http;
 
-use Illuminate\Http\Request;
+use Illuminate\Http\Request as BaseRequest;
 use Larashed\Agent\System\Measurements;
 use Larashed\Agent\Trackers\Traits\TimeCalculationTrait;
 
@@ -21,7 +21,7 @@ class Webhook
     protected $measurements;
 
     /**
-     * @var Request
+     * @var BaseRequest
      */
     protected $request;
 
@@ -44,11 +44,11 @@ class Webhook
      * Webhook constructor.
      *
      * @param Measurements $measurements
-     * @param Request      $request
+     * @param BaseRequest  $request
      * @param null         $source
      * @param null         $name
      */
-    public function __construct(Measurements $measurements, Request $request, $source = null, $name = null)
+    public function __construct(Measurements $measurements, BaseRequest $request, $source = null, $name = null)
     {
         $this->measurements = $measurements;
         $this->request = $request;
@@ -62,18 +62,18 @@ class Webhook
     public function toArray()
     {
         return [
-            'name'       => $this->name,
-            'source'     => $this->source,
-            'payload'    => $this->getPayload($this->request)
+            'name'    => $this->name,
+            'source'  => $this->source,
+            'payload' => $this->getPayload($this->request)
         ];
     }
 
     /**
-     * @param Request $request
+     * @param BaseRequest $request
      *
      * @return array
      */
-    protected function getPayload(Request $request)
+    protected function getPayload(BaseRequest $request)
     {
         $payload = [
             'url'     => $request->fullUrl(),
@@ -86,11 +86,11 @@ class Webhook
     }
 
     /**
-     * @param Request $request
+     * @param BaseRequest $request
      *
      * @return array
      */
-    protected function getHeaders(Request $request)
+    protected function getHeaders(BaseRequest $request)
     {
         $headers = collect($request->header())->map(function ($header) {
             return $header[0];
