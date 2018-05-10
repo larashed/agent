@@ -73,7 +73,7 @@ trait RequestMock
         return $mock;
     }
 
-    protected function getResponseMock($code = '', $exception = null)
+    protected function getResponseMock($code = 0, $exception = null)
     {
         $mock = $this->createMock(Response::class);
         $mock->expects($this->any())

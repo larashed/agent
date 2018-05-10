@@ -37,6 +37,6 @@ class ExceptionTransformerTest extends TestCase
         $transformer->setIgnoredNamespaces(['TestCase']);
         $result = $transformer->toArray();
 
-        $this->assertCount(3, $result[0]['trace']);
+        $this->assertCount(2, $result[0]['trace']);
     }
 }
