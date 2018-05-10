@@ -103,7 +103,7 @@ class Job
      */
     protected function setAttributes(JobContract $job)
     {
-        $this->name = $job->getName();
+        $this->name = $job->resolveName();
         $this->attempts = $job->attempts();
         $this->setStartedAt($this->measurements->microtime());
         $this->setCreatedAt($this->measurements->time());
