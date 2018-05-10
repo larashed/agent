@@ -3,7 +3,7 @@
 namespace Larashed\Agent\Tests\Unit\Trackers;
 
 use Illuminate\Contracts\Queue\Job;
-use Illuminate\Queue\Events\JobExceptionOccurred;
+use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
 use Larashed\Agent\Agent;
@@ -89,28 +89,29 @@ class QueueJobTrackerTest extends TestCase
 
     protected function getJobProcessingMock()
     {
-        $mock = new JobProcessing('processing', $this->getJobMock(), []);
+        $mock = new JobProcessing('processing', $this->getJobMock());
 
         return $mock;
     }
 
     protected function getJobProcessedMock()
     {
-        $mock = new JobProcessed('processed', $this->getJobMock(), []);
+        $mock = new JobProcessed('processed', $this->getJobMock());
 
         return $mock;
     }
 
     protected function getJobFailedMock()
     {
-        $mock = new JobExceptionOccurred('processed', $this->getJobMock(), [], new \Exception('message'));
+        $mock = new JobFailed('processed', $this->getJobMock(), new \Exception('message'));
+
         return $mock;
     }
 
     protected function getJobMock()
     {
         $job = \Mockery::mock(Job::class);
-        $job->shouldReceive('getName')->andReturn('Job');
+        $job->shouldReceive('resolveName')->andReturn('Job');
         $job->shouldReceive('attempts')->andReturn(3);
         $job->shouldReceive('getQueue')->andReturn('default');
 
