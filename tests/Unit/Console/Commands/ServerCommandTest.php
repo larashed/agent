@@ -10,7 +10,7 @@ use Larashed\Agent\System\System;
 use Larashed\Agent\Tests\TestConsoleKernel;
 use Larashed\Agent\Trackers\ServerEnvironmentTracker;
 use Larashed\Api\Endpoints\Agent;
-use Larashed\Api\LarashedApi;
+use Larashed\Agent\Api\LarashedApi;
 use Orchestra\Testbench\TestCase;
 
 class ServerCommandTest extends TestCase

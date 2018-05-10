@@ -2,8 +2,8 @@
 
 namespace Larashed\Agent\Console\Commands;
 
-use Larashed\Api\LarashedApi;
 use Illuminate\Console\Command;
+use Larashed\Agent\Api\LarashedApi;
 use Larashed\Agent\Trackers\ServerEnvironmentTracker;
 
 /**
@@ -61,7 +61,7 @@ class ServerCommand extends Command
         $data = $this->tracker->gather();
 
         try {
-            $this->api->agent()->send(['server' => $data]);
+            $this->api->sendAgentData(json_encode(['server' => $data]));
         } catch (\Exception $exception) {
             $this->error('Failed to send collected server data.');
         }

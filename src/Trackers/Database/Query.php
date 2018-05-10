@@ -2,12 +2,8 @@
 
 namespace Larashed\Agent\Trackers\Database;
 
-use Exception;
-use Illuminate\Contracts\Queue\Job as JobContract;
 use Illuminate\Database\Events\QueryExecuted;
 use Larashed\Agent\System\Measurements;
-use Larashed\Agent\Trackers\Traits\ExceptionTransformerTrait;
-use Larashed\Agent\Trackers\Traits\MemoryCalculationTrait;
 use Larashed\Agent\Trackers\Traits\TimeCalculationTrait;
 
 /**
