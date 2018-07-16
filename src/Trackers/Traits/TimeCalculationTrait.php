@@ -61,7 +61,7 @@ trait TimeCalculationTrait
      */
     public function setProcessedIn($completedAt)
     {
-        $this->processedIn = round(($completedAt - $this->startedAt) * 1000, 2);
+        $this->processedIn = round(($completedAt - $this->startedAt) * 1000);
 
         return $this;
     }
