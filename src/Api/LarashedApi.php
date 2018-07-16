@@ -48,20 +48,19 @@ class LarashedApi
     protected function makeRequest($endpoint, $query = [], $body = null)
     {
         $uri = $this->config->getBaseUrl() . '/' . $endpoint . '?' . http_build_query($query);
+        $authKey = $this->config->getApplicationId() . ":" . $this->config->getApplicationKey();
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $uri);
-        curl_setopt(
-            $ch,
-            CURLOPT_USERPWD,
-            $this->config->getApplicationId() . ":" . $this->config->getApplicationKey()
-        );
+        curl_setopt($ch, CURLOPT_USERPWD, $authKey);
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
         curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Larashed-Environment: ' . $this->config->getEnvironment()]);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $this->config->shouldUseCertificate());
+
         $response = curl_exec($ch);
         curl_close($ch);
 
