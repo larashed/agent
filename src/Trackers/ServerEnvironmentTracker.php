@@ -108,8 +108,7 @@ class ServerEnvironmentTracker implements TrackerInterface
     {
         $data = [
             'created_at' => $this->measurements->time(),
-
-            'app' => [
+            'app'        => [
                 'name'            => $this->laravelCollector->appName(),
                 'env'             => $this->laravelCollector->environment(),
                 'url'             => $this->laravelCollector->url(),
@@ -121,8 +120,7 @@ class ServerEnvironmentTracker implements TrackerInterface
                 ],
                 'laravel_version' => $this->laravelCollector->laravelVersion(),
             ],
-
-            'system' => [
+            'system'     => [
                 'reboot_required' => $this->systemCollector->rebootRequired(),
                 'php_version'     => $this->systemCollector->phpVersion(),
                 'hostname'        => $this->systemCollector->hostname(),
@@ -130,8 +128,7 @@ class ServerEnvironmentTracker implements TrackerInterface
                 'os'              => $this->systemCollector->osInformation(),
                 'services'        => $this->serviceCollector->services(),
             ],
-
-            'resources' => [
+            'resources'  => [
                 'cpu'          => $this->cpuCollector->cpu(),
                 'memory_total' => $this->memoryCollector->total(),
                 'memory_free'  => $this->memoryCollector->free(),

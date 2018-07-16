@@ -23,7 +23,7 @@ class Query
     /**
      * @var Measurements
      */
-    protected $metrics;
+    protected $measurements;
 
     /**
      * @var array
@@ -38,12 +38,12 @@ class Query
     /**
      * Query constructor.
      *
-     * @param Measurements  $metrics
+     * @param Measurements  $measurements
      * @param QueryExecuted $query
      */
-    public function __construct(Measurements $metrics, QueryExecuted $query)
+    public function __construct(Measurements $measurements, QueryExecuted $query)
     {
-        $this->metrics = $metrics;
+        $this->measurements = $measurements;
         $this->setAttributes($query);
     }
 
@@ -67,10 +67,10 @@ class Query
      */
     protected function setAttributes(QueryExecuted $query)
     {
-        $this->setCreatedAt($this->metrics->time());
+        $this->setCreatedAt($this->measurements->time());
         $this->statement = $query->sql;
         $this->connection = $query->connectionName;
-        $this->processedIn = $query->time;
+        $this->processedIn = round($query->time);
 
         return $this;
     }
