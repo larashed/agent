@@ -27,21 +27,6 @@ class Response
     protected $response;
 
     /**
-     * @var ExceptionTransformer
-     */
-    protected $exceptionTransformer;
-
-    /**
-     * @var LaravelResponse|LaravelRedirectResponse
-     */
-    protected $content;
-
-    /**
-     * @var string|null
-     */
-    protected $type;
-
-    /**
      * @var integer|null
      */
     protected $code;

@@ -26,7 +26,7 @@ trait MemoryCalculationTrait
      */
     public function setStartMemoryUsage($startMemory)
     {
-        $this->startMemory = $startMemory;
+        $this->startMemory = (int) $startMemory;
 
         return $this;
     }
@@ -38,7 +38,7 @@ trait MemoryCalculationTrait
      */
     public function setMemoryUsage($endMemory)
     {
-        $this->memory = $endMemory - $this->startMemory;
+        $this->memory = round((int) $endMemory - $this->startMemory);
 
         return $this;
     }
