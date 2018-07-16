@@ -108,8 +108,9 @@ class AgentServiceProvider extends ServiceProvider
                 new Config(
                     config('larashed-agent.application_id'),
                     config('larashed-agent.application_key'),
-                    config('larashed-agent.url'),
-                    config('larashed-agent.verify-ssl')
+                    config('app.env'),
+                    config('larashed.url'),
+                    config('larashed.verify-ssl')
                 )
             );
         };

@@ -24,6 +24,11 @@ class Config
     /**
      * @var string
      */
+    protected $environment;
+
+    /**
+     * @var string
+     */
     protected $url;
 
     /**
@@ -36,13 +41,15 @@ class Config
      *
      * @param        $applicationId
      * @param        $applicationKey
+     * @param        $environment
      * @param string $url
      * @param bool   $cert
      */
-    public function __construct($applicationId, $applicationKey, $url = 'https://app.larashed.com/api/', $cert = true)
+    public function __construct($applicationId, $applicationKey, $environment, $url = 'https://app.larashed.com/api/', $cert = true)
     {
         $this->applicationId = $applicationId;
         $this->applicationKey = $applicationKey;
+        $this->environment = $environment;
         $this->url = $url;
         $this->useCertificate = $cert;
     }
@@ -66,9 +73,17 @@ class Config
     /**
      * @return string
      */
+    public function getEnvironment()
+    {
+        return $this->environment;
+    }
+
+    /**
+     * @return string
+     */
     public function getBaseUrl()
     {
-        return $this->url . self::API_VERSION;
+        return rtrim('/', $this->url) . '/' . self::API_VERSION;
     }
 
     /**

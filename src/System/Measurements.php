@@ -5,7 +5,7 @@ namespace Larashed\Agent\System;
 use Carbon\Carbon;
 
 /**
- * Class Metrics
+ * Class Measurements
  *
  * @codeCoverageIgnore
  *
@@ -51,6 +51,6 @@ class Measurements
      */
     public function microtimeDiff($start, $end)
     {
-        return round(($end - $start) * 1000, 2);
+        return round(($end - $start) * 1000);
     }
 }
