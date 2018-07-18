@@ -2,6 +2,8 @@
 
 namespace Larashed\Agent\Api;
 
+use Illuminate\Support\Collection;
+
 /**
  * Class LarashedApi
  *
@@ -31,30 +33,41 @@ class LarashedApi
      *
      * @throws LarashedApiException
      */
-    public function sendAgentData($data)
+    public function sendAppData($data)
     {
-        return $this->makeRequest('agent', ['batch' => true], $data);
+        return $this->makePostRequest('agent/application', $data);
     }
 
     /**
-     * @param       $endpoint
-     * @param array $query
-     * @param null  $body
+     * @param $data
      *
      * @return mixed
      *
      * @throws LarashedApiException
      */
-    protected function makeRequest($endpoint, $query = [], $body = null)
+    public function sendServerData($data)
     {
-        $uri = $this->config->getBaseUrl() . '/' . $endpoint . '?' . http_build_query($query);
+        return $this->makePostRequest('agent/server', $data);
+    }
+
+    /**
+     * @param       $endpoint
+     * @param mixed $body
+     *
+     * @return mixed
+     *
+     * @throws LarashedApiException
+     */
+    protected function makePostRequest($endpoint, $body)
+    {
+        $uri = rtrim('/', $this->config->getBaseUrl()) . '/' . $endpoint;
         $authKey = $this->config->getApplicationId() . ":" . $this->config->getApplicationKey();
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $uri);
         curl_setopt($ch, CURLOPT_USERPWD, $authKey);
         curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $this->normalizeBody($body));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
         curl_setopt($ch, CURLOPT_TIMEOUT, 10);
@@ -71,5 +84,19 @@ class LarashedApi
         }
 
         return $json;
+    }
+
+    /**
+     * @param $body
+     *
+     * @return string
+     */
+    protected function normalizeBody($body)
+    {
+        if (is_array($body) || $body instanceof Collection) {
+            return json_encode($body);
+        }
+
+        return $body;
     }
 }

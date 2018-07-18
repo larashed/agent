@@ -3,6 +3,7 @@
 namespace Larashed\Agent\Console\Commands;
 
 use Exception;
+use Larashed\Agent\Console\Interval;
 use Larashed\Agent\Console\Sender;
 use Larashed\Agent\Api\LarashedApi;
 use Larashed\Agent\Storage\StorageInterface;
@@ -21,6 +22,11 @@ class DaemonCommand extends Command
     protected $sender;
 
     /**
+     * @var Interval
+     */
+    protected $interval;
+
+    /**
      * @var boolean
      */
     protected $running = true;
@@ -32,7 +38,7 @@ class DaemonCommand extends Command
      */
     protected $signature = 'larashed:daemon 
             {--single-run : run the daemon once}
-            {--sleep=10 : sleep interval in seconds}
+            {--sleep=5 : sleep interval in seconds}
             {--limit=200 : number of records to send}';
 
     /**
@@ -45,11 +51,13 @@ class DaemonCommand extends Command
     /**
      * DaemonCommand constructor.
      *
-     * @param Sender $sender
+     * @param Sender    $sender
+     * @param  Interval $interval
      */
-    public function __construct(Sender $sender)
+    public function __construct(Sender $sender, Interval $interval)
     {
         $this->sender = $sender;
+        $this->interval = $interval;
 
         parent::__construct();
     }
@@ -59,18 +67,26 @@ class DaemonCommand extends Command
      */
     public function handle()
     {
-        $limit = (int) $this->option('limit');
+        $recordLimit = $this->getRecordLimit();
 
-        if ($this->option('single-run')) {
-            $this->outputReport($this->sender->send($limit));
+        if ($this->isSingleRun()) {
+            $this->outputReport($this->sender->send($recordLimit));
 
             return;
         }
 
-        while ($this->shouldRun()) {
-            $this->outputReport($this->sender->send($limit));
+        $this->interval->start();
 
-            sleep((int) $this->option('sleep'));
+        while ( $this->shouldRun() ) {
+            $this->outputReport($this->sender->send($recordLimit));
+
+            sleep($this->getSleepSeconds());
+
+            if ($this->interval->passed()) {
+                $this->call('larashed:server');
+
+                $this->interval->restart();
+            }
         }
     }
 
@@ -92,6 +108,30 @@ class DaemonCommand extends Command
     protected function shouldRun()
     {
         return $this->running;
+    }
+
+    /**
+     * @return int
+     */
+    protected function getRecordLimit()
+    {
+        return (int) $this->option('limit');
+    }
+
+    /**
+     * @return bool
+     */
+    protected function isSingleRun()
+    {
+        return (bool) $this->option('single-run');
+    }
+
+    /**
+     * @return int
+     */
+    protected function getSleepSeconds()
+    {
+        return (int) $this->option('sleep');
     }
 
     /**

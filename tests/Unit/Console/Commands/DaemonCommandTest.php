@@ -2,11 +2,16 @@
 
 namespace Larashed\Agent\Tests\Console\Commands;
 
+use Illuminate\Console\Command;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\Artisan;
+use Larashed\Agent\Api\LarashedApi;
 use Larashed\Agent\Console\Commands\DaemonCommand;
+use Larashed\Agent\Console\Commands\ServerCommand;
+use Larashed\Agent\Console\Interval;
 use Larashed\Agent\Console\Sender;
 use Larashed\Agent\Tests\TestConsoleKernel;
+use Larashed\Agent\Trackers\ServerEnvironmentTracker;
 use Orchestra\Testbench\TestCase;
 
 class DaemonCommandTest extends TestCase
@@ -45,11 +50,12 @@ class DaemonCommandTest extends TestCase
         $this->assertEquals(100, $senderReceivedLimit);
     }
 
-    public function testDaemonKeepsRunning()
+    public function testDaemonKeepsRunningAndCallsServerCommand()
     {
         $timesRan = 0;
 
-        $sendCallback = function () use (&$timesRan) {
+        $sender = \Mockery::mock(Sender::class);
+        $sender->shouldReceive('send')->andReturnUsing(function () use (&$timesRan) {
             $timesRan++;
 
             if ($timesRan > 2) {
@@ -57,22 +63,24 @@ class DaemonCommandTest extends TestCase
             }
 
             return true;
-        };
+        });
 
-        $sender = \Mockery::mock(Sender::class);
-        $sender->shouldReceive('send')->andReturnUsing($sendCallback);
+        $interval = new Interval(0.000001);
+        $this->command = new DaemonCommand($sender, $interval);
 
-        $this->command = new DaemonCommand($sender);
+        $serverCommand = new \Larashed\Agent\Tests\Unit\Mocks\ServerCommand();
 
         app()->singleton(Kernel::class, TestConsoleKernel::class);
         app(Kernel::class)->registerCommand($this->command);
+        app(Kernel::class)->registerCommand($serverCommand);
 
         Artisan::call('larashed:daemon', ['--sleep' => 0]);
 
         $this->assertEquals(3, $timesRan);
+        $this->assertEquals(3, $serverCommand->calledTimes);
     }
 
-    public function callDaemon($senderResult, $options = ['--single-run' => true])
+    protected function callDaemon($senderResult, $options = ['--single-run' => true])
     {
         $sender = \Mockery::mock(Sender::class);
 
@@ -82,7 +90,8 @@ class DaemonCommandTest extends TestCase
             $sender->shouldReceive('send')->andReturnUsing($senderResult);
         }
 
-        $command = new DaemonCommand($sender);
+        $interval = new Interval(0);
+        $command = new DaemonCommand($sender, $interval);
 
         app()->singleton(Kernel::class, TestConsoleKernel::class);
         app(Kernel::class)->registerCommand($command);
