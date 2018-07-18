@@ -61,7 +61,7 @@ class ServerCommand extends Command
         $data = $this->tracker->gather();
 
         try {
-            $this->api->sendAgentData(json_encode(['server' => $data]));
+            $this->api->sendServerData($data);
         } catch (\Exception $exception) {
             $this->error('Failed to send collected server data.');
         }
