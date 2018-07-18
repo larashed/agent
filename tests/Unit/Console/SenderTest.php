@@ -58,9 +58,9 @@ class SenderTest extends TestCase
 
         $api = \Mockery::mock(LarashedApi::class);
         if (is_null($exception)) {
-            $api->shouldReceive('sendAgentData')->andReturn($response);
+            $api->shouldReceive('sendAppData')->andReturn($response);
         } else {
-            $api->shouldReceive('sendAgentData')->andThrows($exception);
+            $api->shouldReceive('sendAppData')->andThrows($exception);
         }
 
         $sender = new Sender($storage, $api);
