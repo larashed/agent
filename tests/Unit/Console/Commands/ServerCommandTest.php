@@ -4,12 +4,9 @@ namespace Larashed\Agent\Tests\Console\Commands;
 
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\Artisan;
-use Larashed\Agent\Console\Commands\DeployCommand;
 use Larashed\Agent\Console\Commands\ServerCommand;
-use Larashed\Agent\System\System;
 use Larashed\Agent\Tests\TestConsoleKernel;
 use Larashed\Agent\Trackers\ServerEnvironmentTracker;
-use Larashed\Api\Endpoints\Agent;
 use Larashed\Agent\Api\LarashedApi;
 use Orchestra\Testbench\TestCase;
 
@@ -17,17 +14,13 @@ class ServerCommandTest extends TestCase
 {
     public function testServerCommandSendsData()
     {
-        $endpoint = \Mockery::mock(Agent::class);
-        $endpoint->shouldReceive('send')->andReturnUsing(function($dataToSend) {
-            $this->assertArrayHasKey('server', $dataToSend);
-            $this->assertArrayHasKey('data', $dataToSend['server']);
-        });
-
         $api = \Mockery::mock(LarashedApi::class);
-        $api->shouldReceive('agent')->andReturn($endpoint);
+        $api->shouldReceive('sendServerData')
+            ->andReturn('');
 
         $tracker = \Mockery::mock(ServerEnvironmentTracker::class);
-        $tracker->shouldReceive('gather')->andReturn(['data' => []]);
+        $tracker->shouldReceive('gather')
+                ->andReturn(['data' => []]);
 
         $command = new ServerCommand($tracker, $api);
 
@@ -43,11 +36,9 @@ class ServerCommandTest extends TestCase
 
     public function testServerCommandFailsToSendsData()
     {
-        $endpoint = \Mockery::mock(Agent::class);
-        $endpoint->shouldReceive('send')->andThrows(new \Exception('error'));
-
         $api = \Mockery::mock(LarashedApi::class);
-        $api->shouldReceive('agent')->andReturn($endpoint);
+        $api->shouldReceive('sendServerData')
+            ->andThrows(new \Exception('error'));
 
         $tracker = \Mockery::mock(ServerEnvironmentTracker::class);
         $tracker->shouldReceive('gather');
