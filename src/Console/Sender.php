@@ -52,7 +52,7 @@ class Sender
         $data = join("\n", $records->toArray());
 
         try {
-            $response = $this->api->sendAgentData($data);
+            $response = $this->api->sendAppData($data);
 
             return $this->removeRecordsIfSendingSucceeded($records, $response);
         } catch (Exception $exception) {
