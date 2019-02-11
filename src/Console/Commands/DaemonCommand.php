@@ -5,8 +5,6 @@ namespace Larashed\Agent\Console\Commands;
 use Exception;
 use Larashed\Agent\Console\Interval;
 use Larashed\Agent\Console\Sender;
-use Larashed\Agent\Api\LarashedApi;
-use Larashed\Agent\Storage\StorageInterface;
 use Illuminate\Console\Command;
 
 /**
@@ -77,13 +75,13 @@ class DaemonCommand extends Command
 
         $this->interval->start();
 
-        while ( $this->shouldRun() ) {
+        while ($this->shouldRun()) {
             $this->outputReport($this->sender->send($recordLimit));
 
             sleep($this->getSleepSeconds());
 
             if ($this->interval->passed()) {
-                $this->call('larashed:server');
+                $this->callServerCommand();
 
                 $this->interval->restart();
             }
@@ -132,6 +130,15 @@ class DaemonCommand extends Command
     protected function getSleepSeconds()
     {
         return (int) $this->option('sleep');
+    }
+
+    protected function callServerCommand()
+    {
+        try {
+            $this->call('larashed:server');
+        } catch (Exception $exception) {
+            $this->error('Failed to send server data.');
+        }
     }
 
     /**
