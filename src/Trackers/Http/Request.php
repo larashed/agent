@@ -79,7 +79,9 @@ class Request
     protected function getUserData()
     {
         $data = ['id' => 0, 'name' => null];
-        $user = $this->request->user(config('larashed.agent.auth.guard'));
+        $guard = config('larashed.auth.guard', config('auth.defaults.guard'));
+
+        $user = $this->request->user($guard);
 
         if (!is_null($user)) {
             $data['id'] = $user->getAuthIdentifier();
