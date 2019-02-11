@@ -29,10 +29,6 @@ class AgentServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        if (!config('larashed.enabled')) {
-            return;
-        }
-
         $this->app[Agent::class]->start();
     }
 
@@ -43,10 +39,6 @@ class AgentServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        if (!config('larashed.enabled')) {
-            return;
-        }
-
         $this->app->singleton(StorageInterface::class, $this->getStorageInstance());
         $this->app->singleton(LarashedApi::class, $this->getLarashedApiInstance());
         $this->app->singleton(Agent::class, $this->getAgentInstance());
@@ -93,7 +85,7 @@ class AgentServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__ . '/../install-stubs/config/larashed.php', 'larashed');
         $this->publishes([
             __DIR__ . '/../install-stubs/config/' => config_path()
-        ], 'larashed.config');
+        ], 'larashed');
     }
 
     /**
@@ -106,8 +98,8 @@ class AgentServiceProvider extends ServiceProvider
         return function () {
             return new LarashedApi(
                 new Config(
-                    config('larashed-agent.application_id'),
-                    config('larashed-agent.application_key'),
+                    config('larashed.application_id'),
+                    config('larashed.application_key'),
                     config('app.env'),
                     config('larashed.url'),
                     config('larashed.verify-ssl')

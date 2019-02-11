@@ -3,7 +3,6 @@
 namespace Larashed\Agent\Events;
 
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 /**
  * Class RequestExecuted
@@ -17,18 +16,15 @@ class RequestExecuted
      */
     public $request;
 
-    /**
-     * @var Response
-     */
     public $response;
 
     /**
      * RequestExecuted constructor.
      *
-     * @param Request  $request
-     * @param Response $response
+     * @param Request $request
+     * @param         $response
      */
-    public function __construct(Request $request, Response $response)
+    public function __construct(Request $request, $response)
     {
         $this->request = $request;
         $this->response = $response;
