@@ -83,7 +83,7 @@ class Config
      */
     public function getBaseUrl()
     {
-        return rtrim('/', $this->url) . '/' . self::API_VERSION;
+        return rtrim($this->url, '/') . '/' . self::API_VERSION;
     }
 
     /**

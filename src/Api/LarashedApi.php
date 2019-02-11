@@ -60,7 +60,7 @@ class LarashedApi
      */
     protected function makePostRequest($endpoint, $body)
     {
-        $uri = rtrim('/', $this->config->getBaseUrl()) . '/' . $endpoint;
+        $uri = rtrim($this->config->getBaseUrl(), '/') . '/' . $endpoint;
         $authKey = $this->config->getApplicationId() . ":" . $this->config->getApplicationKey();
 
         $ch = curl_init();
@@ -78,7 +78,6 @@ class LarashedApi
         curl_close($ch);
 
         $json = json_decode($response, true);
-
         if (is_null($json)) {
             throw new LarashedApiException('Failed to make request to Larashed API');
         }
