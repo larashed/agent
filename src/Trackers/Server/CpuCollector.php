@@ -23,7 +23,11 @@ class CpuCollector
      */
     public function cpu()
     {
-        return $this->calculateCpuAverage();
+        try {
+            return $this->calculateCpuAverage();
+        } catch (\Exception $exception) {
+            return 0;
+        }
     }
 
     /**
