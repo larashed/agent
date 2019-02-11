@@ -58,14 +58,14 @@ class ServerCommand extends Command
      */
     public function handle()
     {
-        $data = $this->tracker->gather();
-
         try {
+            $data = $this->tracker->gather();
+
             $this->api->sendServerData($data);
+
+            $this->info('Successfully sent collected server data.');
         } catch (\Exception $exception) {
             $this->error('Failed to send collected server data.');
         }
-
-        $this->info('Successfully sent collected server data.');
     }
 }
