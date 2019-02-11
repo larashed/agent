@@ -1,7 +1,7 @@
 Larashed Monitoring Agent
 ==============
 
-[![Build Status](https://travis-ci.com/larashed/agent.svg?branch=5.7)](https://travis-ci.com/larashed/agent)
+[![Build Status](https://travis-ci.com/larashed/agent.svg?branch=5.5)](https://travis-ci.com/larashed/agent)
 
 This package hooks into your Laravel application and sends monitoring data to [larashed.com](https://larashed.com/)
 
@@ -29,7 +29,7 @@ This package hooks into your Laravel application and sends monitoring data to [l
 By using the `composer require` command:
 
 ```
-composer require "larashed/agent=~5.7"
+composer require "larashed/agent=~5.5"
 ```
 
 Or by putting the following in your `composer.json` file:
@@ -37,7 +37,7 @@ Or by putting the following in your `composer.json` file:
 ```json
 {
     "require": {
-        "larashed/agent": "~5.7"
+        "larashed/agent": "~5.5"
     }
 }
 ```
