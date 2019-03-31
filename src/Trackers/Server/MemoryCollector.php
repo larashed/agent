@@ -19,6 +19,8 @@ class MemoryCollector
     }
 
     /**
+     * Total memory in bytes
+     *
      * @return int
      */
     public function total()
@@ -27,6 +29,8 @@ class MemoryCollector
     }
 
     /**
+     * Free memory in bytes
+     *
      * @return int
      */
     public function free()
@@ -45,7 +49,7 @@ class MemoryCollector
         $contents = $this->system->fileContents('/proc/meminfo');
 
         if (preg_match($pattern, $contents, $match)) {
-            return (int) $match[1];
+            return (int) round($match[1] / 1024);
         }
 
         return null;
