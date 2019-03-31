@@ -3,6 +3,7 @@
 namespace Larashed\Agent\Console\Commands;
 
 use Exception;
+use Larashed\Agent\Console\DaemonRestartHandler;
 use Larashed\Agent\Console\Interval;
 use Larashed\Agent\Console\Sender;
 use Illuminate\Console\Command;
@@ -23,6 +24,11 @@ class DaemonCommand extends Command
      * @var Interval
      */
     protected $interval;
+
+    /**
+     * @var DaemonRestartHandler
+     */
+    protected $restartHandler;
 
     /**
      * @var boolean
@@ -52,10 +58,11 @@ class DaemonCommand extends Command
      * @param Sender    $sender
      * @param  Interval $interval
      */
-    public function __construct(Sender $sender, Interval $interval)
+    public function __construct(Sender $sender, Interval $interval, DaemonRestartHandler $restartHandler)
     {
         $this->sender = $sender;
         $this->interval = $interval;
+        $this->restartHandler = $restartHandler;
 
         parent::__construct();
     }
@@ -65,6 +72,12 @@ class DaemonCommand extends Command
      */
     public function handle()
     {
+        // a newly up process doesn't need to be restarted
+        // lets just mark it as completed
+        if ($this->restartHandler->check()) {
+            $this->restartHandler->markComplete();
+        }
+
         $recordLimit = $this->getRecordLimit();
 
         if ($this->isSingleRun()) {
@@ -76,6 +89,10 @@ class DaemonCommand extends Command
         $this->interval->start();
 
         while ($this->shouldRun()) {
+            if ($this->restartHandler->check()) {
+                exit;
+            }
+
             $this->outputReport($this->sender->send($recordLimit));
 
             sleep($this->getSleepSeconds());
