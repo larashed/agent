@@ -27,6 +27,8 @@ class DiskCollector
     }
 
     /**
+     * Total disk size in bytes
+     *
      * @return int
      */
     public function total()
@@ -35,6 +37,8 @@ class DiskCollector
     }
 
     /**
+     * Free disk space in bytes
+     *
      * @return int
      */
     public function free()
