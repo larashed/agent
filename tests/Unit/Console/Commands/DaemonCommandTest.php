@@ -4,10 +4,12 @@ namespace Larashed\Agent\Tests\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Console\Kernel;
+use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Artisan;
 use Larashed\Agent\Api\LarashedApi;
 use Larashed\Agent\Console\Commands\DaemonCommand;
 use Larashed\Agent\Console\Commands\ServerCommand;
+use Larashed\Agent\Console\DaemonRestartHandler;
 use Larashed\Agent\Console\Interval;
 use Larashed\Agent\Console\Sender;
 use Larashed\Agent\Tests\TestConsoleKernel;
@@ -66,7 +68,9 @@ class DaemonCommandTest extends TestCase
         });
 
         $interval = new Interval(0.000001);
-        $this->command = new DaemonCommand($sender, $interval);
+        $restart = new DaemonRestartHandler(app(Filesystem::class), '/tmp/123');
+
+        $this->command = new DaemonCommand($sender, $interval, $restart);
 
         $serverCommand = new \Larashed\Agent\Tests\Unit\Mocks\ServerCommand();
 
@@ -91,7 +95,8 @@ class DaemonCommandTest extends TestCase
         }
 
         $interval = new Interval(0);
-        $command = new DaemonCommand($sender, $interval);
+        $restart = new DaemonRestartHandler(app(Filesystem::class), '/tmp/123');
+        $command = new DaemonCommand($sender, $interval, $restart);
 
         app()->singleton(Kernel::class, TestConsoleKernel::class);
         app(Kernel::class)->registerCommand($command);

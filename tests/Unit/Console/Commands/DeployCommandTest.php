@@ -3,31 +3,29 @@
 namespace Larashed\Agent\Tests\Console\Commands;
 
 use Illuminate\Contracts\Console\Kernel;
+use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Artisan;
+use Larashed\Agent\Api\LarashedApi;
 use Larashed\Agent\Console\Commands\DeployCommand;
+use Larashed\Agent\Console\DaemonRestartHandler;
+use Larashed\Agent\System\Measurements;
 use Larashed\Agent\System\System;
 use Larashed\Agent\Tests\TestConsoleKernel;
 use Orchestra\Testbench\TestCase;
 
 class DeployCommandTest extends TestCase
 {
-    public function testDeployCommandFindsAndKillsProcess()
+    public $markedForRestart;
+    public $git;
+
+    public function testDeployCommandFinishes()
     {
-        $exec = function () {
-            return "1\n2\n3\n";
-        };
-
-        $execExcludedPid = function () {
-            return "2\n";
-        };
-
-        $this->callDeploy($exec, $execExcludedPid);
+        $this->callDeploy();
 
         $output = Artisan::output();
 
-        $this->assertContains('Killed Larashed process (1)', $output);
-        $this->assertNotContains('Killed Larashed process (2)', $output);
-        $this->assertContains('Killed Larashed process (3)', $output);
+        $this->assertEquals('', $output);
+        $this->assertTrue($this->markedForRestart);
     }
 
     public function callDeploy(...$exec)
@@ -35,7 +33,14 @@ class DeployCommandTest extends TestCase
         $system = \Mockery::mock(System::class);
         $system->shouldReceive('exec')->andReturnUsing(...$exec);
 
-        $command = new DeployCommand($system);
+        $restart = \Mockery::mock(DaemonRestartHandler::class);
+        $restart->shouldReceive('markNeeded')->andReturnUsing(function () {
+            $this->markedForRestart = true;
+        });
+
+        $api = \Mockery::mock(LarashedApi::class);
+        $api->shouldReceive('sendDeploymentData')->andReturn();
+        $command = new DeployCommand($system, new Measurements(), $restart, $api);
 
         app()->singleton(Kernel::class, TestConsoleKernel::class);
         app(Kernel::class)->registerCommand($command);
