@@ -42,6 +42,17 @@ class LarashedApi
      * @param $data
      *
      * @return mixed
+     * @throws LarashedApiException
+     */
+    public function sendDeploymentData($data)
+    {
+        return $this->makePostRequest('agent/deployment', $data);
+    }
+
+    /**
+     * @param $data
+     *
+     * @return mixed
      *
      * @throws LarashedApiException
      */
@@ -78,6 +89,7 @@ class LarashedApi
         curl_close($ch);
 
         $json = json_decode($response, true);
+
         if (is_null($json)) {
             throw new LarashedApiException('Failed to make request to Larashed API');
         }
