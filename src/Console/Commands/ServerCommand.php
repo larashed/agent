@@ -60,7 +60,6 @@ class ServerCommand extends Command
     {
         try {
             $data = $this->tracker->gather();
-
             $this->api->sendServerData($data);
 
             $this->info('Successfully sent collected server data.');
