@@ -65,6 +65,7 @@ class SystemEnvironmentCollectorTest extends TestCase
     {
         $system = \Mockery::mock(System::class);
         $system->shouldReceive($method)->andReturn($return);
+        $system->shouldReceive('getOS')->andReturn(System::OS_LINUX);
 
         $services = new SystemEnvironmentCollector($system);
 
