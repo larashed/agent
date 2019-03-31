@@ -51,29 +51,97 @@ class SystemEnvironmentCollector
     }
 
     /**
+     * UNIX timestamp of last boot
+     *
      * @return false|int
      */
     public function uptime()
     {
+        if ($this->system->getOS() === System::OS_OSX) {
+            $output = $this->system->exec('sysctl -a | grep kern.boottime');
+
+            if (preg_match('/sec = (\d+)/', $output, $matches)) {
+                return (int) $matches[1];
+            }
+        }
+
         $output = $this->system->exec('uptime -s');
 
         return strtotime($output);
     }
 
     /**
+     * $os = [
+     *   'id',
+     *   'version',
+     *   'pretty_name',
+     *   'name'
+     * ]
+     *
      * @return array
      */
     public function osInformation()
     {
-        $output = $this->system->fileContents('/etc/os-release');
+        if ($this->system->getOS() === System::OS_OSX) {
+            return $this->osxInformation();
+        }
 
-        $lines = collect(explode("\n", $output));
+        return $this->linuxInformation();
+    }
+
+    /**
+     * @return array
+     */
+    protected function osxInformation()
+    {
+        $os = $this->parseOsInformation(
+            $this->system->exec('sw_vers'),
+            '/([a-z_]+):\t(.*)/i',
+            [
+                'buildversion'   => 'id',
+                'productversion' => 'version',
+                'productname'    => 'pretty_name',
+            ]
+        );
+
+        $os['name'] = 'OSX';
+
+        return $os;
+    }
+
+    /**
+     * @return array
+     */
+    protected function linuxInformation()
+    {
+        return $this->parseOsInformation(
+            $this->system->fileContents('/etc/os-release'),
+            '/([a-z_]+)=(.*)/i',
+            [
+                'id'          => 'id',
+                'name'        => 'name',
+                'version_id'  => 'version',
+                'pretty_name' => 'pretty_name',
+            ]
+        );
+    }
+
+    /**
+     * @param $input
+     * @param $regex
+     * @param $keys
+     *
+     * @return array
+     */
+    protected function parseOsInformation($input, $regex, $keys)
+    {
+        $lines = collect(explode("\n", $input));
         $values = collect([]);
 
         foreach ($lines as $line) {
             $line = trim($line);
 
-            if (preg_match('/([A-Z_]+)=(.*)/', $line, $matches)) {
+            if (preg_match($regex, $line, $matches)) {
                 $key = strtolower($matches[1]);
                 $value = str_replace('"', '', $matches[2]);
 
@@ -82,10 +150,10 @@ class SystemEnvironmentCollector
         }
 
         $os = [];
-        $os['id'] = $values->get('id');
-        $os['name'] = $values->get('name');
-        $os['version'] = $values->get('version_id');
-        $os['pretty_name'] = $values->get('pretty_name');
+
+        foreach ($keys as $fromKey => $toKey) {
+            $os[$toKey] = $values->get($fromKey);
+        }
 
         return $os;
     }

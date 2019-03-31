@@ -11,6 +11,10 @@ namespace Larashed\Agent\System;
  */
 class System
 {
+    const OS_OSX = 'osx';
+    const OS_WINDOWS = 'windows';
+    const OS_LINUX = 'linux';
+
     /**
      * @param $command
      *
@@ -79,5 +83,20 @@ class System
     public function freeDiskSpace($path)
     {
         return disk_free_space($path);
+    }
+
+    public function getOS()
+    {
+        $os = PHP_OS;
+
+        if (stristr($os, 'DAR')) {
+            return System::OS_OSX;
+        }
+
+        if (stristr($os, 'WIN')) {
+            return System::OS_WINDOWS;
+        }
+
+        return System::OS_LINUX;
     }
 }

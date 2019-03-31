@@ -28,12 +28,12 @@ class MemoryCollectorTest extends TestCase
 
     public function testFree()
     {
-        $this->assertEquals(101808, $this->memory->free());
+        $this->assertEquals(round(101808 / 1024), $this->memory->free());
     }
 
     public function testTotal()
     {
-        $this->assertEquals(2046652, $this->memory->total());
+        $this->assertEquals(round(2046652 / 1024), $this->memory->total());
     }
 
     public function testMemoryCollectorFails()
