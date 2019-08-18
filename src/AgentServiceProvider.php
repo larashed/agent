@@ -7,7 +7,9 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Contracts\Http\Kernel as HttpKernel;
 use Larashed\Agent\Api\Config;
 use Larashed\Agent\Api\LarashedApi;
+use Larashed\Agent\Console\Commands\CronCommand;
 use Larashed\Agent\Console\DaemonRestartHandler;
+use Larashed\Agent\Console\Mutex;
 use Larashed\Agent\Storage\StorageInterface;
 use Larashed\Agent\Storage\FileStorage;
 use Larashed\Agent\System\System;
@@ -46,14 +48,18 @@ class AgentServiceProvider extends ServiceProvider
         $this->app->singleton(LarashedApi::class, $this->getLarashedApiInstance());
         $this->app->singleton(Agent::class, $this->getAgentInstance());
         $this->app->singleton(RequestTrackerMiddleware::class);
-        $this->app->singleton(DaemonRestartHandler::class, function($app) {
+        $this->app->singleton(DaemonRestartHandler::class, function ($app) {
             return new DaemonRestartHandler($app[Filesystem::class], config('larashed.restart-file'));
+        });
+        $this->app->singleton(Mutex::class, function ($app) {
+            return new Mutex($app[Filesystem::class], config('larashed.mutex-file'));
         });
 
         $this->commands([
             DaemonCommand::class,
             DeployCommand::class,
-            ServerCommand::class
+            ServerCommand::class,
+            CronCommand::class,
         ]);
 
         $this->loadMiddlewares();

@@ -31,7 +31,17 @@ return [
     | Used for letting the daemon know that it needs to be killed
     |
     */
-    'restart-file' => 'larashed/restart-file',
+    'restart-file'    => 'larashed/restart-file',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Mutex file
+    |--------------------------------------------------------------------------
+    |
+    | Makes sure multiple cronjobs don't run at the same time
+    |
+    */
+    'mutex-file'    => 'larashed/mutex',
     /*
     |--------------------------------------------------------------------------
     | Default guard

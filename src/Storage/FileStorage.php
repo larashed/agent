@@ -50,6 +50,14 @@ class FileStorage implements StorageInterface
     }
 
     /**
+     * @return int
+     */
+    public function recordCount()
+    {
+        return count($this->getDisk()->files($this->directory));
+    }
+
+    /**
      * @param int $limit
      *
      * @return Collection

@@ -60,6 +60,10 @@ class Sender
         }
     }
 
+    public function pendingRecords() {
+        return $this->storage->recordCount();
+    }
+
     /**
      * @param Collection $records
      * @param array      $response

@@ -26,6 +26,11 @@ interface StorageInterface
     public function records($limit);
 
     /**
+     * @return mixed
+     */
+    public function recordCount();
+
+    /**
      * @param array $identifiers
      *
      * @return mixed
