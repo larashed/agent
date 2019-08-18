@@ -23,13 +23,14 @@ This package hooks into your Laravel application and sends monitoring data to [l
  5.5.x    | 5.5.x
  5.6.x    | 5.6.x
  5.7.x.   | 5.7.x
+ 5.8.x.   | 5.8.x
 
 ### Installation
 
 By using the `composer require` command:
 
 ```
-composer require "larashed/agent=~5.7"
+composer require "larashed/agent=~5.8"
 ```
 
 Or by putting the following in your `composer.json` file:
@@ -37,7 +38,7 @@ Or by putting the following in your `composer.json` file:
 ```json
 {
     "require": {
-        "larashed/agent": "~5.7"
+        "larashed/agent": "~5.8"
     }
 }
 ```
