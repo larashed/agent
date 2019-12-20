@@ -73,6 +73,9 @@ class LarashedApi
     {
         $uri = rtrim($this->config->getBaseUrl(), '/') . '/' . $endpoint;
         $authKey = $this->config->getApplicationId() . ":" . $this->config->getApplicationKey();
+        $headers = ['Larashed-Environment: ' . $this->config->getEnvironment()];
+        $headers[] = 'Content-Type: application/json';
+        $headers[] = 'Accept: application/json';
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $uri);
@@ -82,7 +85,7 @@ class LarashedApi
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
         curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Larashed-Environment: ' . $this->config->getEnvironment()]);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $this->config->shouldUseCertificate());
 
         $response = curl_exec($ch);
@@ -91,7 +94,7 @@ class LarashedApi
         $json = json_decode($response, true);
 
         if (is_null($json)) {
-            throw new LarashedApiException('Failed to make request to Larashed API');
+            throw new LarashedApiException('Failed to make request to Larashed API: ' . $response);
         }
 
         return $json;
