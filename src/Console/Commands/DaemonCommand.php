@@ -3,6 +3,7 @@
 namespace Larashed\Agent\Console\Commands;
 
 use Exception;
+use Larashed\Agent\Api\LarashedApiException;
 use Larashed\Agent\Console\DaemonRestartHandler;
 use Larashed\Agent\Console\Interval;
 use Larashed\Agent\Console\Sender;
@@ -55,8 +56,8 @@ class DaemonCommand extends Command
     /**
      * DaemonCommand constructor.
      *
-     * @param Sender    $sender
-     * @param  Interval $interval
+     * @param Sender   $sender
+     * @param Interval $interval
      */
     public function __construct(Sender $sender, Interval $interval, DaemonRestartHandler $restartHandler)
     {
@@ -93,7 +94,13 @@ class DaemonCommand extends Command
                 exit;
             }
 
-            $this->outputReport($this->sender->send($recordLimit));
+            try {
+                $this->outputReport(
+                    $this->sender->send($recordLimit)
+                );
+            } catch (LarashedApiException $exception) {
+                $this->error($exception->getMessage());
+            }
 
             sleep($this->getSleepSeconds());
 
