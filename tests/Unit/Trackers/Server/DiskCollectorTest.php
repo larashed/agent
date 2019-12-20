@@ -13,7 +13,7 @@ class DiskCollectorTest extends TestCase
      */
     protected $disk;
 
-    public function setUp()
+    public function setUp(): void
     {
         $system = $this->getSystemMock(1024.10, 2048.20);
 

@@ -13,7 +13,7 @@ class WebhookRequestTrackerTest extends TestCase
 {
     use MeasurementsMock, WebhookRequestMock;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
     }

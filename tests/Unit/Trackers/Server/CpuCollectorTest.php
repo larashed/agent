@@ -14,7 +14,7 @@ class CpuCollectorTest extends TestCase
      */
     protected $cpu;
 
-    public function setUp()
+    public function setUp(): void
     {
         $first = 'cpu  180594930 12962 51433614 1364705275 242872 0 1112522 182457 0 0';
         $second = 'cpu  180595237 12962 51433812 1364706969 242872 0 1112523 182458 0 0';

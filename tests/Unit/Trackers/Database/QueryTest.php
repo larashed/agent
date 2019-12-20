@@ -14,7 +14,7 @@ class QueryTest extends TestCase
     protected $measurements;
     protected $queryExecuted;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 

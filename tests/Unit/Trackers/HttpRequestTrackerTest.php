@@ -15,7 +15,7 @@ class HttpRequestTrackerTest extends TestCase
 {
     use MeasurementsMock, RequestMock;
 
-    public function setUp()
+    public function setUp(): void
     {
         if (!defined('LARAVEL_START')) {
             define('LARAVEL_START', 0);

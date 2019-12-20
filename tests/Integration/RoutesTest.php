@@ -10,7 +10,10 @@ use Larashed\Agent\Http\Controllers\HealthCheckController;
 
 class RoutesTest extends TestCase
 {
-    public function setUp()
+    /**
+     * @return void
+     */
+    public function setUp(): void
     {
         parent::setUp();
 
