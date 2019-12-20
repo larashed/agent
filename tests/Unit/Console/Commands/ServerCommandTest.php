@@ -52,6 +52,6 @@ class ServerCommandTest extends TestCase
 
         $output = Artisan::output();
 
-        $this->assertContains('Failed to send collected server data.', $output);
+        $this->assertContains('Failed to send collected server data: error', $output);
     }
 }

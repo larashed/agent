@@ -42,12 +42,13 @@ class SenderTest extends TestCase
         $this->assertFalse($result);
     }
 
-    public function testCatchingExceptionReturnsFalse()
+    public function testFail()
     {
-        $sender = $this->getSenderInstance(['record'], ['success' => true], new \Exception('asd'));
-        $result = $sender->send(1);
+        $this->expectExceptionMessage('error');
 
-        $this->assertFalse($result);
+        $sender = $this->getSenderInstance(['record'], ['success' => true], new \Exception('error'));
+
+        $sender->send(1);
     }
 
     protected function getSenderInstance($records = [], $response = [], $exception = null)

@@ -64,7 +64,7 @@ class ServerCommand extends Command
 
             $this->info('Successfully sent collected server data.');
         } catch (\Exception $exception) {
-            $this->error('Failed to send collected server data.');
+            $this->error('Failed to send collected server data: ' . $exception->getMessage());
         }
     }
 }
