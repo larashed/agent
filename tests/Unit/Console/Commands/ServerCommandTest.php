@@ -31,7 +31,7 @@ class ServerCommandTest extends TestCase
 
         $output = Artisan::output();
 
-        $this->assertContains('Successfully sent collected server data.', $output);
+        $this->assertStringContainsStringIgnoringCase('Successfully sent collected server data.', $output);
     }
 
     public function testServerCommandFailsToSendsData()
@@ -52,6 +52,6 @@ class ServerCommandTest extends TestCase
 
         $output = Artisan::output();
 
-        $this->assertContains('Failed to send collected server data.', $output);
+        $this->assertStringContainsStringIgnoringCase('Failed to send collected server data.', $output);
     }
 }

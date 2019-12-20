@@ -24,7 +24,7 @@ class DaemonCommandTest extends TestCase
 
         $output = Artisan::output();
 
-        $this->assertContains('Successfully sent collected data.', $output);
+        $this->assertStringContainsStringIgnoringCase('Successfully sent collected data.', $output);
     }
 
     public function testDaemonSingleRunReportsOnFailure()
@@ -33,7 +33,7 @@ class DaemonCommandTest extends TestCase
 
         $output = Artisan::output();
 
-        $this->assertContains('Failed to send collected data.', $output);
+        $this->assertStringContainsStringIgnoringCase('Failed to send collected data.', $output);
     }
 
     public function testDaemonUsesCorrectLimit()

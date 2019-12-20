@@ -2,6 +2,7 @@
 
 namespace Larashed\Agent\Tests\Unit\Trackers\Http;
 
+use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 use Larashed\Agent\Tests\Traits\WebhookRequestMock;
 use Larashed\Agent\Trackers\Http\Webhook;
 use Orchestra\Testbench\TestCase;
@@ -9,7 +10,7 @@ use Larashed\Agent\Tests\Traits\MeasurementsMock;
 
 class WebhookTest extends TestCase
 {
-    use MeasurementsMock, WebhookRequestMock;
+    use MeasurementsMock, WebhookRequestMock, ArraySubsetAsserts;
 
     public function testWebhookToArrayHasCorrectStructure()
     {

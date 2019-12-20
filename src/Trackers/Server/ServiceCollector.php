@@ -2,6 +2,7 @@
 
 namespace Larashed\Agent\Trackers\Server;
 
+use Illuminate\Support\Str;
 use Larashed\Agent\System\System;
 
 /**
@@ -36,7 +37,7 @@ class ServiceCollector
         $lines = explode("\n", $output);
 
         $services = collect($lines)->filter(function ($line) {
-            return str_contains($line, '[ + ]');
+            return Str::contains($line, '[ + ]');
         })->map(function ($line) {
             $line = trim(str_replace('[ + ] ', '', $line));
 

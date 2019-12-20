@@ -3,6 +3,7 @@
 namespace Larashed\Agent\Console;
 
 use Exception;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Larashed\Agent\Storage\StorageInterface;
 use Larashed\Agent\Api\LarashedApi;
@@ -68,7 +69,7 @@ class Sender
      */
     protected function removeRecordsIfSendingSucceeded(Collection $records, $response)
     {
-        if (array_get($response, 'success', false) === true) {
+        if (Arr::get($response, 'success', false) === true) {
             $this->storage->remove($records->keys()->toArray());
 
             return true;

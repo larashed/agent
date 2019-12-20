@@ -3,6 +3,7 @@
 namespace Larashed\Agent\Trackers\Database;
 
 use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Support\Str;
 
 /**
  * Class QueryExcluder
@@ -57,6 +58,6 @@ class QueryExcluder
             ]);
         }
 
-        return str_contains(strtolower($query->sql), $match);
+        return Str::contains(strtolower($query->sql), $match);
     }
 }

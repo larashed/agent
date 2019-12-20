@@ -31,6 +31,6 @@ class RoutesTest extends TestCase
     {
         $response = $this->call('get', '/larashed/health-check');
         $this->assertEquals(200, $response->getStatusCode());
-        $this->assertContains('ok', $response->getContent());
+        $this->assertStringContainsStringIgnoringCase('ok', $response->getContent());
     }
 }

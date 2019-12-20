@@ -3,7 +3,9 @@
 namespace Larashed\Agent\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 use Larashed\Agent\Api\LarashedApi;
 use Larashed\Agent\Api\LarashedApiException;
 use Larashed\Agent\Console\DaemonRestartHandler;
@@ -115,7 +117,7 @@ class DeployCommand extends Command
     protected function getDeploymentInformation()
     {
         $errors = ['not a git repository', 'not found'];
-        if (str_contains($this->exec('git'), $errors)) {
+        if (Str::contains($this->exec('git'), $errors)) {
             return null;
         }
 
@@ -134,11 +136,11 @@ class DeployCommand extends Command
         }
 
         return [
-            'commit_hash'       => array_get($data, 'commit'),
+            'commit_hash'       => Arr::get($data, 'commit'),
             'commit_remote'     => trim($this->exec('git config --get remote.origin.url')),
-            'commit_message'    => array_get($data, 'message'),
-            'commit_author'     => array_get($data, 'author'),
-            'commit_created_at' => $this->measurements->time(array_get($data, 'commit_created_at')),
+            'commit_message'    => Arr::get($data, 'message'),
+            'commit_author'     => Arr::get($data, 'author'),
+            'commit_created_at' => $this->measurements->time(Arr::get($data, 'commit_created_at')),
             'created_at'        => $this->measurements->time()
         ];
     }
