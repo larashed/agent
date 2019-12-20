@@ -41,6 +41,8 @@ class Sender
      * @param $limit
      *
      * @return bool
+     *
+     * @throws \Larashed\Agent\Api\LarashedApiException
      */
     public function send($limit)
     {
@@ -51,14 +53,9 @@ class Sender
         }
 
         $data = join("\n", $records->toArray());
+        $response = $this->api->sendAppData($data);
 
-        try {
-            $response = $this->api->sendAppData($data);
-
-            return $this->removeRecordsIfSendingSucceeded($records, $response);
-        } catch (Exception $exception) {
-            return false;
-        }
+        return $this->removeRecordsIfSendingSucceeded($records, $response);
     }
 
     /**
