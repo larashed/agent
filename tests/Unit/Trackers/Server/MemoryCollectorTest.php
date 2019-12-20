@@ -13,7 +13,7 @@ class MemoryCollectorTest extends TestCase
      */
     protected $memory;
 
-    public function setUp()
+    public function setUp(): void
     {
         $contents = '
         MemTotal:        2046652 kB

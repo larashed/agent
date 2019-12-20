@@ -13,7 +13,7 @@ class LaravelEnvironmentCollectorTest extends TestCase
      */
     protected $laravel;
 
-    public function setUp()
+    public function setUp(): void
     {
         $app = \Mockery::mock(Application::class);
         $app->shouldReceive('version')->andReturn('5.6.40');

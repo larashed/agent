@@ -16,7 +16,7 @@ class QueueJobTrackerTest extends TestCase
 {
     use MeasurementsMock, RequestMock;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
     }
