@@ -17,7 +17,7 @@ class FileStorageTest extends TestCase
         app('config')->set('filesystems.disks.local.root', $this->directory . '/');
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         foreach ($this->getFileList() as $file) {
             unlink($file);
