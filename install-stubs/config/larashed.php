@@ -5,7 +5,18 @@ return [
     'application_key' => env('LARASHED_APP_KEY'),
     'url'             => env('LARASHED_API_URL', 'https://api.larashed.com/'),
     'verify-ssl'      => env('LARASHED_API_VERIFY_SSL', true),
-
+    /*
+    |--------------------------------------------------------------------------
+    | Ignored environments
+    |--------------------------------------------------------------------------
+    |
+    | The following configuration defines array of environments in which Larashed
+    | is disabled. Therefore Larashed artisan commands will not be accessible.
+    |
+    */
+    'ignore_environments' => [
+        'local'
+    ],
     /*
     |--------------------------------------------------------------------------
     | Storage
