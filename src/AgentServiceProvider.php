@@ -32,7 +32,9 @@ class AgentServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $this->app[Agent::class]->start();
+        if ($this->isEnabled()) {
+            $this->app[Agent::class]->start();
+        }
     }
 
     /**
@@ -42,6 +44,12 @@ class AgentServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->loadConfig();
+
+        if (!$this->isEnabled()) {
+            return;
+        }
+
         $this->app->singleton(StorageInterface::class, $this->getStorageInstance());
         $this->app->singleton(LarashedApi::class, $this->getLarashedApiInstance());
         $this->app->singleton(Agent::class, $this->getAgentInstance());
@@ -58,7 +66,6 @@ class AgentServiceProvider extends ServiceProvider
 
         $this->loadMiddlewares();
         $this->loadRoutes();
-        $this->loadConfig();
     }
 
     /**
@@ -149,5 +156,13 @@ class AgentServiceProvider extends ServiceProvider
 
             return $agent;
         };
+    }
+
+    /**
+     * @return bool
+     */
+    protected function isEnabled()
+    {
+        return !in_array(config('app.env'), config('larashed.ignore_environments'));
     }
 }
