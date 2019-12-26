@@ -11,9 +11,9 @@ namespace Larashed\Agent\System;
  */
 class System
 {
-    const OS_OSX = 'osx';
+    const OS_OSX     = 'osx';
     const OS_WINDOWS = 'windows';
-    const OS_LINUX = 'linux';
+    const OS_LINUX   = 'linux';
 
     /**
      * @param $command
@@ -63,6 +63,14 @@ class System
     public function phpVersion()
     {
         return phpversion();
+    }
+
+    /**
+     * @return array
+     */
+    public function loadAverage()
+    {
+        return sys_getloadavg();
     }
 
     /**
