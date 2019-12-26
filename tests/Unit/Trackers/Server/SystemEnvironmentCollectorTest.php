@@ -31,9 +31,14 @@ class SystemEnvironmentCollectorTest extends TestCase
 
     public function testUptime()
     {
-        $system = $this->getSystemEnvironmentCollector('exec', '2018-01-01 00:00:00');
+        $contents = '
+        ctxt 1761010084
+        btime 1576933732
+        processes 21779870
+        procs_running 1';
+        $system = $this->getSystemEnvironmentCollector('fileContents', $contents);
 
-        $this->assertEquals(1514764800, $system->uptime());
+        $this->assertEquals(1576933732, $system->uptime());
     }
 
     public function testOsInformation()
