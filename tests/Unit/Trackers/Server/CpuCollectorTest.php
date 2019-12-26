@@ -3,14 +3,14 @@
 namespace Larashed\Agent\Tests\Unit\Trackers\Server;
 
 use Larashed\Agent\System\System;
-use Larashed\Agent\Trackers\Server\CpuCollector;
+use Larashed\Agent\Trackers\Server\CPUUsageCollector;
 use Larashed\Agent\Trackers\Server\DiskCollector;
 use Orchestra\Testbench\TestCase;
 
 class CpuCollectorTest extends TestCase
 {
     /**
-     * @var CpuCollector
+     * @var CPUUsageCollector
      */
     protected $cpu;
 
@@ -23,13 +23,13 @@ class CpuCollectorTest extends TestCase
         $system->shouldReceive('fileContents')
             ->andReturn($first, $second);
 
-        $this->cpu = new CpuCollector($system);
+        $this->cpu = new CPUUsageCollector($system);
 
         parent::setUp();
     }
 
     public function testCpu()
     {
-        $this->assertEquals(23.53, $this->cpu->cpu());
+        $this->assertEquals(22.96, $this->cpu->cpu());
     }
 }

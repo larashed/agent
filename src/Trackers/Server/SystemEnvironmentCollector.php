@@ -65,9 +65,12 @@ class SystemEnvironmentCollector
             }
         }
 
-        $output = $this->system->exec('uptime -s');
+        $output = $this->system->fileContents('/proc/stat');
+        if (preg_match('/btime\s(\d+)/', $output, $matches)) {
+            return trim($matches[1]);
+        }
 
-        return strtotime($output);
+        return false;
     }
 
     /**
