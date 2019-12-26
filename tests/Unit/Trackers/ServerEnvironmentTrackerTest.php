@@ -4,9 +4,10 @@ namespace Larashed\Agent\Tests\Unit\Trackers;
 
 use Illuminate\Contracts\Foundation\Application;
 use Larashed\Agent\Tests\Traits\RequestMock;
-use Larashed\Agent\Trackers\Server\CpuCollector;
+use Larashed\Agent\Trackers\Server\CPUUsageCollector;
 use Larashed\Agent\Trackers\Server\DiskCollector;
 use Larashed\Agent\Trackers\Server\LaravelEnvironmentCollector;
+use Larashed\Agent\Trackers\Server\LoadAverageCollector;
 use Larashed\Agent\Trackers\Server\MemoryCollector;
 use Larashed\Agent\Trackers\Server\ServiceCollector;
 use Larashed\Agent\Trackers\Server\SystemEnvironmentCollector;
@@ -68,6 +69,7 @@ class ServerEnvironmentTrackerTest extends TestCase
 
         $this->assertArrayHasKey('resources', $data);
         $this->assertArrayHasKey('cpu', $data['resources']);
+        $this->assertArrayHasKey('load', $data['resources']);
         $this->assertArrayHasKey('memory_free', $data['resources']);
         $this->assertArrayHasKey('memory_total', $data['resources']);
         $this->assertArrayHasKey('disk_total', $data['resources']);
@@ -90,8 +92,11 @@ class ServerEnvironmentTrackerTest extends TestCase
         $disk->shouldReceive('free')->andReturn(1);
         $disk->shouldReceive('total')->andReturn(2);
 
-        $cpu = \Mockery::mock(CpuCollector::class);
+        $cpu = \Mockery::mock(CPUUsageCollector::class);
         $cpu->shouldReceive('cpu')->andReturn(1);
+
+        $load = \Mockery::mock(LoadAverageCollector::class);
+        $load->shouldReceive('load')->andReturn([0,1,2]);
 
         $laravel = \Mockery::mock(LaravelEnvironmentCollector::class);
         $laravel->shouldReceive('appName')->andReturn('');
@@ -109,6 +114,7 @@ class ServerEnvironmentTrackerTest extends TestCase
         $system->shouldReceive('phpVersion')->andReturn('');
         $system->shouldReceive('hostname')->andReturn('');
         $system->shouldReceive('uptime')->andReturn('uptime');
+        $system->shouldReceive('loadAverage')->andReturn([0,1,2]);
         $system->shouldReceive('osInformation')->andReturn(['id' => '', 'name' => '', 'pretty_name' => '', 'version' => '']);
 
         $tracker = new ServerEnvironmentTracker(
@@ -118,6 +124,7 @@ class ServerEnvironmentTrackerTest extends TestCase
             $memory,
             $disk,
             $cpu,
+            $load,
             $laravel,
             $system
         );
