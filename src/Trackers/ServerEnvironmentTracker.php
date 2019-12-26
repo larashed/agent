@@ -2,10 +2,11 @@
 
 namespace Larashed\Agent\Trackers;
 
+use Larashed\Agent\Trackers\Server\LoadAverageCollector;
 use RuntimeException;
 use Larashed\Agent\Trackers\Server\SystemEnvironmentCollector;
 use Illuminate\Contracts\Foundation\Application;
-use Larashed\Agent\Trackers\Server\CpuCollector;
+use Larashed\Agent\Trackers\Server\CPUUsageCollector;
 use Larashed\Agent\Trackers\Server\LaravelEnvironmentCollector;
 use Larashed\Agent\Trackers\Server\MemoryCollector;
 use Larashed\Agent\Trackers\Server\DiskCollector;
@@ -45,9 +46,14 @@ class ServerEnvironmentTracker implements TrackerInterface
     protected $diskCollector;
 
     /**
-     * @var CpuCollector
+     * @var CPUUsageCollector
      */
-    protected $cpuCollector;
+    protected $cpuUsageCollector;
+
+    /**
+     * @var LoadAverageCollector
+     */
+    protected $loadAverageCollector;
 
     /**
      * @var LaravelEnvironmentCollector
@@ -67,7 +73,8 @@ class ServerEnvironmentTracker implements TrackerInterface
      * @param ServiceCollector            $serviceCollector
      * @param MemoryCollector             $memoryCollector
      * @param DiskCollector               $diskCollector
-     * @param CpuCollector                $cpuCollector
+     * @param CPUUsageCollector           $cpuUsageCollector
+     * @param LoadAverageCollector        $loadAverageCollector
      * @param LaravelEnvironmentCollector $laravelCollector
      * @param SystemEnvironmentCollector  $systemCollector
      */
@@ -77,7 +84,8 @@ class ServerEnvironmentTracker implements TrackerInterface
         ServiceCollector $serviceCollector,
         MemoryCollector $memoryCollector,
         DiskCollector $diskCollector,
-        CpuCollector $cpuCollector,
+        CPUUsageCollector $cpuUsageCollector,
+        LoadAverageCollector $loadAverageCollector,
         LaravelEnvironmentCollector $laravelCollector,
         SystemEnvironmentCollector $systemCollector
     )
@@ -87,7 +95,8 @@ class ServerEnvironmentTracker implements TrackerInterface
         $this->serviceCollector = $serviceCollector;
         $this->memoryCollector = $memoryCollector;
         $this->diskCollector = $diskCollector;
-        $this->cpuCollector = $cpuCollector;
+        $this->cpuUsageCollector = $cpuUsageCollector;
+        $this->loadAverageCollector = $loadAverageCollector;
         $this->laravelCollector = $laravelCollector;
         $this->systemCollector = $systemCollector;
     }
@@ -129,7 +138,8 @@ class ServerEnvironmentTracker implements TrackerInterface
                 'services'        => $this->serviceCollector->services(),
             ],
             'resources'  => [
-                'cpu'          => $this->cpuCollector->cpu(),
+                'cpu'          => $this->cpuUsageCollector->cpu(),
+                'load'         => $this->loadAverageCollector->load(),
                 'memory_total' => $this->memoryCollector->total(),
                 'memory_free'  => $this->memoryCollector->free(),
                 'disk_total'   => $this->diskCollector->total(),
