@@ -163,6 +163,6 @@ class AgentServiceProvider extends ServiceProvider
      */
     protected function isEnabled()
     {
-        return !in_array(config('app.env'), config('larashed.ignore_environments'));
+        return !in_array(config('app.env'), config('larashed.ignore_environments', []));
     }
 }
