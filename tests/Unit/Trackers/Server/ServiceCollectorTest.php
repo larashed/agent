@@ -18,28 +18,40 @@ class ServiceCollectorTest extends TestCase
          [ + ]  service4
          [ - ]  service5
          [ ? ]  service6
-         [ + ]  service7';
+         [ + ]  service7
+         badservice
+         ';
 
         $expected = [
-            'service1',
-            'service3',
-            'service4',
-            'service7',
+            [
+                'status' => ServiceCollector::STATUS_RUNNING,
+                'name'   => 'service1',
+            ],
+            [
+                'status' => ServiceCollector::STATUS_STOPPED,
+                'name'   => 'service2',
+            ],
+            [
+                'status' => ServiceCollector::STATUS_RUNNING,
+                'name'   => 'service3',
+            ],
+            [
+                'status' => ServiceCollector::STATUS_RUNNING,
+                'name'   => 'service4',
+            ],
+            [
+                'status' => ServiceCollector::STATUS_STOPPED,
+                'name'   => 'service5',
+            ],
+            [
+                'status' => ServiceCollector::STATUS_UNDETERMINED,
+                'name'   => 'service6',
+            ],
+            [
+                'status' => ServiceCollector::STATUS_RUNNING,
+                'name'   => 'service7',
+            ]
         ];
-
-        $services = $this->getServiceCollector($input);
-
-        $this->assertEquals($expected, $services->services());
-    }
-
-    public function testInactiveServicesAreNotCollected()
-    {
-        $input = '
-         [ - ]  service1
-         [ ? ]  service2
-         [ - ]  service3';
-
-        $expected = [];
 
         $services = $this->getServiceCollector($input);
 
