@@ -12,6 +12,10 @@ use Larashed\Agent\System\System;
  */
 class ServiceCollector
 {
+    const STATUS_STOPPED      = 0;
+    const STATUS_RUNNING      = 1;
+    const STATUS_UNDETERMINED = 2;
+    const STATUS_UNKNOWN      = 3;
     /**
      * @var System
      */
@@ -32,18 +36,48 @@ class ServiceCollector
      */
     public function services()
     {
-        $output = $this->system->exec('service --status-all 2>/dev/null | grep \'[ + ]\'');
+        $output = $this->system->exec('service --status-all 2>&1');
 
-        $lines = explode("\n", $output);
+        $lines = explode("\n", trim($output));
 
-        $services = collect($lines)->filter(function ($line) {
-            return Str::contains($line, '[ + ]');
-        })->map(function ($line) {
-            $line = trim(str_replace('[ + ] ', '', $line));
+        $services = collect($lines)->map(function ($line) {
+            return $this->parseLine($line);
+        })->reject(null);
 
-            return $line;
-        });
+        return $services->toArray();
+    }
 
-        return $services->values()->toArray();
+    protected function parseLine($line)
+    {
+        if (preg_match('/\[\s(.)\s\](.*)/', $line, $matches)) {
+            return [
+                'status' => $this->parseServiceStatus($matches[1]),
+                'name'   => $this->parseServiceName($matches[2]),
+            ];
+        }
+
+        return null;
+    }
+
+    protected function parseServiceStatus($status)
+    {
+        if ($status === '-') {
+            return self::STATUS_STOPPED;
+        }
+
+        if ($status === '+') {
+            return self::STATUS_RUNNING;
+        }
+
+        if ($status === '?') {
+            return self::STATUS_UNDETERMINED;
+        }
+
+        return self::STATUS_UNKNOWN;
+    }
+
+    protected function parseServiceName($name)
+    {
+        return trim(strtolower($name));
     }
 }
