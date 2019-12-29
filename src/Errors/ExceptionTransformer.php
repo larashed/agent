@@ -3,6 +3,8 @@
 namespace Larashed\Agent\Errors;
 
 use Exception;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 
 /**
  * Class ExceptionTransformer
@@ -76,14 +78,18 @@ class ExceptionTransformer
         $lines = [];
 
         collect($this->exception->getTrace())->each(function ($trace) use (&$lines) {
-            $line = array_only($trace, ['file', 'line', 'function', 'class']);
+            $line = Arr::only($trace, ['file', 'line', 'function', 'class']);
+
+            $codeSnippet = new CodeSnippet($trace['file'], $trace['line']);
+
+            $line = Arr::add($line, 'snippet', $codeSnippet->get());
+
             $lines[] = $line;
 
-            if (str_contains(array_get($line, 'class'), $this->ignoredNamespaces)) {
+            if (Str::contains(Arr::get($line, 'class'), $this->ignoredNamespaces)) {
                 return false;
             }
         });
-
         return $lines;
     }
 }
