@@ -82,7 +82,7 @@ class ExceptionTransformer
 
             $codeSnippet = new CodeSnippet($trace['file'], $trace['line']);
 
-            Arr::add($line, 'snippet', $codeSnippet->get());
+            $line = Arr::add($line, 'snippet', $codeSnippet->get());
 
             $lines[] = $line;
 

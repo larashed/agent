@@ -30,15 +30,15 @@ class CodeSnippet
         try {
             $file = new File($this->fileName);
 
-            [$startLine, $endLine] = $this->getBounds($file->numberOfLines());
+            $bounds = $this->getBounds($file->numberOfLines());
 
             $code = [];
 
-            $line = $file->getLine($startLine);
+            $line = $file->getLine($bounds['start']);
 
-            $currentLine = $startLine;
+            $currentLine = $bounds['start'];
 
-            while ($currentLine <= $endLine) {
+            while ($currentLine <= $bounds['end']) {
                 $code[$currentLine] = rtrim(substr($line, 0, 250));
 
                 $line = $file->getNextLine();
@@ -62,6 +62,9 @@ class CodeSnippet
             $startLine = max($endLine - ($this->lineCount - 1), 1);
         }
 
-        return [$startLine, $endLine];
+        return [
+            'start' => $startLine,
+            'end'   => $endLine
+        ];
     }
 }
