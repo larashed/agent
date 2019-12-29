@@ -79,6 +79,9 @@ class ExceptionTransformer
 
         collect($this->exception->getTrace())->each(function ($trace) use (&$lines) {
             $line = Arr::only($trace, ['file', 'line', 'function', 'class']);
+
+            Arr::add($line, 'snippet', (new CodeSnippet())->line($trace['line'])->get($trace['file']));
+
             $lines[] = $line;
 
             if (Str::contains(Arr::get($line, 'class'), $this->ignoredNamespaces)) {
