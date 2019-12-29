@@ -8,19 +8,19 @@ class File
 {
     private $file;
 
-    public function __construct(string $path)
+    public function __construct($path)
     {
         $this->file = new SplFileObject($path);
     }
 
-    public function numberOfLines(): int
+    public function numberOfLines()
     {
         $this->file->seek(PHP_INT_MAX);
 
         return $this->file->key() + 1;
     }
 
-    public function getLine(int $lineNumber = null): string
+    public function getLine($lineNumber = null)
     {
         if (is_null($lineNumber)) {
             return $this->getNextLine();
@@ -31,7 +31,7 @@ class File
         return $this->file->current();
     }
 
-    public function getNextLine(): string
+    public function getNextLine()
     {
         $this->file->next();
 

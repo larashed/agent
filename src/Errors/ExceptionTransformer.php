@@ -80,7 +80,9 @@ class ExceptionTransformer
         collect($this->exception->getTrace())->each(function ($trace) use (&$lines) {
             $line = Arr::only($trace, ['file', 'line', 'function', 'class']);
 
-            Arr::add($line, 'snippet', (new CodeSnippet())->line($trace['line'])->get($trace['file']));
+            $codeSnippet = new CodeSnippet($trace['file'], $trace['line']);
+
+            Arr::add($line, 'snippet', $codeSnippet->get());
 
             $lines[] = $line;
 

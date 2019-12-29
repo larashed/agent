@@ -6,30 +6,29 @@ use RuntimeException;
 
 class CodeSnippet
 {
-    private $line = 1;
+    private $fileName;
 
-    private $lineCount = 9;
+    private $line;
 
-    public function line(int $line): self
+    private $lineCount;
+
+    public function __construct($fileName = null, $line = 1, $lineCount = 9)
     {
+        $this->fileName = $fileName;
+
         $this->line = $line;
-        return $this;
-    }
 
-    public function lineCount(int $lineCount): self
-    {
         $this->lineCount = $lineCount;
-        return $this;
     }
 
-    public function get(string $fileName): array
+    public function get()
     {
-        if (!file_exists($fileName)) {
+        if (!file_exists($this->fileName)) {
             return [];
         }
 
         try {
-            $file = new File($fileName);
+            $file = new File($this->fileName);
 
             [$startLine, $endLine] = $this->getBounds($file->numberOfLines());
 
@@ -52,7 +51,7 @@ class CodeSnippet
         }
     }
 
-    private function getBounds($totalNumberOfLines): array
+    private function getBounds($totalNumberOfLines)
     {
         $startLine = max($this->line - floor($this->lineCount / 2), 1);
 
