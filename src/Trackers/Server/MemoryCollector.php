@@ -11,8 +11,21 @@ use Larashed\Agent\System\System;
  */
 class MemoryCollector
 {
+    /**
+     * @var System
+     */
     protected $system;
 
+    /**
+     * @var string
+     */
+    protected $memInfo;
+
+    /**
+     * MemoryCollector constructor.
+     *
+     * @param System $system
+     */
     public function __construct(System $system)
     {
         $this->system = $system;
@@ -35,23 +48,46 @@ class MemoryCollector
      */
     public function free()
     {
-        return $this->extract('MemFree');
+        $available = $this->extract('MemAvailable');
+        if (!is_null($available)) {
+            return $available;
+        }
+
+        // fallback for kernels older than 3.14
+        $available = (int) $this->extract('MemFree')
+            + (int) $this->extract('Buffers')
+            + (int) $this->extract('Cached');
+
+        return $available;
     }
 
     /**
      * @param $prefix
      *
-     * @return null|int
+     * @return int
      */
     protected function extract($prefix)
     {
         $pattern = '/' . $prefix . ':\s+(\d+)/';
-        $contents = $this->system->fileContents('/proc/meminfo');
+
+        $contents = $this->getMemInfo();
 
         if (preg_match($pattern, $contents, $match)) {
-            return (int) round($match[1] / 1024);
+            return (int) $match[1];
         }
 
         return null;
+    }
+
+    /**
+     * @return bool|string|null
+     */
+    protected function getMemInfo()
+    {
+        if (is_null($this->memInfo)) {
+            $this->memInfo = $this->system->fileContents('/proc/meminfo');
+        }
+
+        return $this->memInfo;
     }
 }
