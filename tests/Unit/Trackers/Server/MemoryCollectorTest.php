@@ -13,37 +13,46 @@ class MemoryCollectorTest extends TestCase
      */
     protected $memory;
 
-    public function setUp(): void
-    {
-        $contents = '
-        MemTotal:        2046652 kB
-        MemFree:          101808 kB';
+    protected $kernelNewContent = '
+        MemTotal:        8174812 kB
+        MemFree:         1050248 kB
+        MemAvailable:    4874268 kB
+        Buffers:          114856 kB
+        Cached:          3876724 kB
+    ';
 
-        $system = $this->getSystemMock($contents);
-
-        $this->memory = new MemoryCollector($system);
-
-        parent::setUp();
-    }
+    protected $kernelOldContent = '
+        MemTotal:        8174812 kB
+        MemFree:         1050248 kB
+        Buffers:          114856 kB
+        Cached:          3876724 kB
+    ';
 
     public function testFree()
     {
-        $this->assertEquals(round(101808 / 1024), $this->memory->free());
+        $system = $this->getSystemMock($this->kernelNewContent);
+
+        $this->memory = new MemoryCollector($system);
+
+        $this->assertEquals(4874268, $this->memory->free());
+    }
+
+    public function testFreeOnOldKernel()
+    {
+        $system = $this->getSystemMock($this->kernelOldContent);
+
+        $this->memory = new MemoryCollector($system);
+
+        $this->assertEquals(5041828, $this->memory->free());
     }
 
     public function testTotal()
     {
-        $this->assertEquals(round(2046652 / 1024), $this->memory->total());
-    }
+        $system = $this->getSystemMock($this->kernelNewContent);
 
-    public function testMemoryCollectorFails()
-    {
-        $system = $this->getSystemMock('');
+        $this->memory = new MemoryCollector($system);
 
-        $collector = new MemoryCollector($system);
-
-        $this->assertNull($collector->total());
-        $this->assertNull($collector->free());
+        $this->assertEquals(8174812, $this->memory->total());
     }
 
     protected function getSystemMock($contents)
