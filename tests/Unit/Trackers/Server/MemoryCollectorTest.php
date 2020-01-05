@@ -34,7 +34,7 @@ class MemoryCollectorTest extends TestCase
 
         $this->memory = new MemoryCollector($system);
 
-        $this->assertEquals(4874268, $this->memory->free());
+        $this->assertEquals(4874268 * 1024, $this->memory->free());
     }
 
     public function testFreeOnOldKernel()
@@ -43,7 +43,7 @@ class MemoryCollectorTest extends TestCase
 
         $this->memory = new MemoryCollector($system);
 
-        $this->assertEquals(5041828, $this->memory->free());
+        $this->assertEquals(5041828 * 1024, $this->memory->free());
     }
 
     public function testTotal()
@@ -52,7 +52,7 @@ class MemoryCollectorTest extends TestCase
 
         $this->memory = new MemoryCollector($system);
 
-        $this->assertEquals(8174812, $this->memory->total());
+        $this->assertEquals(8174812 * 1024, $this->memory->total());
     }
 
     protected function getSystemMock($contents)
