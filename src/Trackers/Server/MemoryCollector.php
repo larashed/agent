@@ -73,7 +73,7 @@ class MemoryCollector
         $contents = $this->getMemInfo();
 
         if (preg_match($pattern, $contents, $match)) {
-            return (int) $match[1];
+            return ((int) $match[1]) * 1024;
         }
 
         return null;
