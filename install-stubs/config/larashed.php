@@ -1,58 +1,61 @@
 <?php
 
 return [
-    'application_id'  => env('LARASHED_APP_ID'),
-    'application_key' => env('LARASHED_APP_KEY'),
-    'url'             => env('LARASHED_API_URL', 'https://api.larashed.com/'),
-    'verify-ssl'      => env('LARASHED_API_VERIFY_SSL', true),
+    'application_id'       => env('LARASHED_APP_ID'),
+    'application_key'      => env('LARASHED_APP_KEY'),
+    'url'                  => env('LARASHED_API_URL', 'https://api.larashed.com/'),
+    'verify-ssl'           => env('LARASHED_API_VERIFY_SSL', true),
     /*
     |--------------------------------------------------------------------------
     | Ignored environments
     |--------------------------------------------------------------------------
     |
-    | The following configuration defines array of environments in which Larashed
-    | is disabled. Therefore Larashed artisan commands will not be accessible.
+    | The following configuration defines a list of environments in which Larashed
+    | is disabled. Separated by commas.
     |
     */
-    'ignore_environments' => [
-        'local'
-    ],
+    'ignored_environments' => env('LARASHED_IGNORED_ENVS', ''),
+
     /*
     |--------------------------------------------------------------------------
-    | Storage
+    | Larashed data directory
     |--------------------------------------------------------------------------
     |
-    | The following configuration defines how the agent will store tracking data.
+    | Directory in which Larashed will store it's data
     |
     */
-    'storage'         => [
-        'default' => 'file',
+    'directory'            => 'app/larashed',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Transport
+    |--------------------------------------------------------------------------
+    |
+    | The following configuration defines how the agent will send the tracking data.
+    |
+    */
+    'transport'            => [
+        'default' => 'socket',
+
         'engines' => [
-            'file' => [
-                'disk'      => 'local',
-                'directory' => 'larashed/monitoring'
-            ]
+            'socket' => [
+                // filename for the unix socket within larashed.directory value
+                'file' => 'larashed.sock'
+            ],
         ]
     ],
     /*
     |--------------------------------------------------------------------------
-    | Restart file
-    |--------------------------------------------------------------------------
-    |
-    | Used for letting the daemon know that it needs to be killed
-    |
-    */
-    'restart-file' => 'larashed/restart-file',
-    /*
-    |--------------------------------------------------------------------------
-    | Default guard
+    | User information tracking
     |--------------------------------------------------------------------------
     |
     | This setting tells us which guard to use for tracking your user names and IDs.
     | Leave this null if you'd like to fallback to config('auth.defaults.guard')
+    | or you can disable it completely
     |
     */
-    'auth'            => [
-        'guard' => null
+    'user'                 => [
+        'enabled' => env('LARASHED_COLLECT_USER_DATA', true),
+        'guard'   => null
     ]
 ];

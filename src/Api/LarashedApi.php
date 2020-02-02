@@ -30,23 +30,11 @@ class LarashedApi
      * @param $data
      *
      * @return mixed
-     *
      * @throws LarashedApiException
      */
-    public function sendAppData($data)
+    public function sendEnvironmentDeployment($data)
     {
-        return $this->makePostRequest('agent/application', $data);
-    }
-
-    /**
-     * @param $data
-     *
-     * @return mixed
-     * @throws LarashedApiException
-     */
-    public function sendDeploymentData($data)
-    {
-        return $this->makePostRequest('agent/deployment', $data);
+        return $this->makePostRequest('agent/environment/deployment', $data);
     }
 
     /**
@@ -56,9 +44,21 @@ class LarashedApi
      *
      * @throws LarashedApiException
      */
-    public function sendServerData($data)
+    public function sendEnvironmentInformation($data)
     {
-        return $this->makePostRequest('agent/server', $data);
+        return $this->makePostRequest('agent/environment/information', $data);
+    }
+
+    /**
+     * @param $data
+     *
+     * @return mixed
+     *
+     * @throws LarashedApiException
+     */
+    public function sendServerInformation($data)
+    {
+        return $this->makePostRequest('agent/server/information', $data);
     }
 
     /**
@@ -94,7 +94,7 @@ class LarashedApi
         $json = json_decode($response, true);
 
         if (is_null($json)) {
-            throw new LarashedApiException('Failed to make request to Larashed API: ' . $response);
+            throw new LarashedApiException('Failed to send request to Larashed API: ' . $response);
         }
 
         return $json;
