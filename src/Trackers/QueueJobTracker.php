@@ -3,10 +3,10 @@
 namespace Larashed\Agent\Trackers;
 
 use Closure;
-use Illuminate\Support\Facades\Queue;
 use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
+use Illuminate\Support\Facades\Queue;
 use Larashed\Agent\Agent;
 use Larashed\Agent\System\Measurements;
 use Larashed\Agent\Trackers\Queue\Job;

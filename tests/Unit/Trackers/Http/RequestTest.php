@@ -13,7 +13,7 @@ class RequestTest extends TestCase
 
     public function setUp(): void
     {
-        if(!defined('LARAVEL_START')) {
+        if (!defined('LARAVEL_START')) {
             define('LARAVEL_START', 0);
         }
 
@@ -24,7 +24,7 @@ class RequestTest extends TestCase
         $this->routeName = 'app.dashboard';
         $this->routeAction = 'App\Http\Controllers\DashboardController@index';
 
-        $this->userId = 1;
+        $this->userId = 0;
         $this->userName = null;
 
         $this->referer = 'http://laravel.app/login';
