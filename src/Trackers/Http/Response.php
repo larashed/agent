@@ -3,9 +3,7 @@
 namespace Larashed\Agent\Trackers\Http;
 
 use Illuminate\Http\Response as LaravelResponse;
-use Illuminate\Http\RedirectResponse as LaravelRedirectResponse;
 use Larashed\Agent\Errors\ExceptionTransformer;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
  * Class Response

@@ -3,10 +3,11 @@
 namespace Larashed\Agent\Console\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Carbon;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
+use Larashed\Agent\Agent;
 use Larashed\Agent\Api\LarashedApi;
 use Larashed\Agent\Api\LarashedApiException;
-use Larashed\Agent\Console\DaemonRestartHandler;
 use Larashed\Agent\System\Measurements;
 use Larashed\Agent\System\System;
 
@@ -21,11 +22,6 @@ class DeployCommand extends Command
      * @var System
      */
     protected $system;
-
-    /**
-     * @var DaemonRestartHandler
-     */
-    protected $daemonRestart;
 
     /**
      * @var LarashedApi
@@ -49,29 +45,21 @@ class DeployCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Handles application deployment for larashed:daemon';
-
-    /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct(System $system, Measurements $measurements, DaemonRestartHandler $daemonRestart, LarashedApi $api)
-    {
-        $this->system = $system;
-        $this->measurements = $measurements;
-        $this->daemonRestart = $daemonRestart;
-        $this->api = $api;
-
-        parent::__construct();
-    }
+    protected $description = 'Sends the latest git commit as a deployment record to Larashed';
 
     /**
      * @throws \Larashed\Agent\Api\LarashedApiException
      */
     public function handle()
     {
-        $this->daemonRestart->markNeeded();
+        if (!Agent::isEnabled()) {
+            $this->error('Larashed agent is disabled for this environment');
+            exit;
+        }
+
+        $this->system = app(System::class);
+        $this->measurements = app(Measurements::class);
+        $this->api = app(LarashedApi::class);
 
         try {
             $this->sendDeployment();
@@ -86,9 +74,8 @@ class DeployCommand extends Command
     protected function sendDeployment()
     {
         $deployment = $this->getDeploymentInformation();
-
         if (!is_null($deployment)) {
-            $this->api->sendDeploymentData($deployment);
+            $this->api->sendEnvironmentDeployment($deployment);
         }
     }
 
@@ -115,7 +102,7 @@ class DeployCommand extends Command
     protected function getDeploymentInformation()
     {
         $errors = ['not a git repository', 'not found'];
-        if (str_contains($this->exec('git'), $errors)) {
+        if (Str::contains($this->exec('git'), $errors)) {
             return null;
         }
 
@@ -134,11 +121,11 @@ class DeployCommand extends Command
         }
 
         return [
-            'commit_hash'       => array_get($data, 'commit'),
+            'commit_hash'       => Arr::get($data, 'commit'),
             'commit_remote'     => trim($this->exec('git config --get remote.origin.url')),
-            'commit_message'    => array_get($data, 'message'),
-            'commit_author'     => array_get($data, 'author'),
-            'commit_created_at' => $this->measurements->time(array_get($data, 'commit_created_at')),
+            'commit_message'    => Arr::get($data, 'message'),
+            'commit_author'     => Arr::get($data, 'author'),
+            'commit_created_at' => $this->measurements->time(Arr::get($data, 'commit_created_at')),
             'created_at'        => $this->measurements->time()
         ];
     }
