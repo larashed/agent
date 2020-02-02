@@ -3,6 +3,7 @@
 namespace Larashed\Agent\Api;
 
 use Illuminate\Support\Collection;
+use Larashed\Agent\AgentConfig;
 
 /**
  * Class LarashedApi
@@ -12,16 +13,16 @@ use Illuminate\Support\Collection;
 class LarashedApi
 {
     /**
-     * @var Config
+     * @var AgentConfig
      */
     protected $config;
 
     /**
      * LarashedApi constructor.
      *
-     * @param Config $config
+     * @param AgentConfig $config
      */
-    public function __construct(Config $config)
+    public function __construct(AgentConfig $config)
     {
         $this->config = $config;
     }
@@ -71,7 +72,7 @@ class LarashedApi
      */
     protected function makePostRequest($endpoint, $body)
     {
-        $uri = rtrim($this->config->getBaseUrl(), '/') . '/' . $endpoint;
+        $uri = rtrim($this->config->getBaseApiUrl(), '/') . '/' . AgentConfig::API_VERSION . '/' . $endpoint;
         $authKey = $this->config->getApplicationId() . ":" . $this->config->getApplicationKey();
         $headers = ['Larashed-Environment: ' . $this->config->getEnvironment()];
         $headers[] = 'Content-Type: application/json';
