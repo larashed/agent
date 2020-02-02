@@ -120,7 +120,7 @@ class GoAgent
         $this->command->line("Downloaded.");
         $this->command->line("Setting permissions.");
 
-        if (!chmod($this->config->getGoAgentPath(), 777)) {
+        if (!chmod($this->config->getGoAgentPath(), 0777)) {
             $this->command->error("Failed to set permissions on agent executable.");
 
             return;
