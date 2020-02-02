@@ -4,7 +4,6 @@ namespace Larashed\Agent;
 
 use Illuminate\Contracts\Http\Kernel as HttpKernel;
 use Illuminate\Support\ServiceProvider;
-use Larashed\Agent\Api\Config;
 use Larashed\Agent\Api\LarashedApi;
 use Larashed\Agent\Console\Commands\AgentCommand;
 use Larashed\Agent\Console\Commands\DeployCommand;
@@ -41,6 +40,8 @@ class AgentServiceProvider extends ServiceProvider
     public function register()
     {
         $this->loadConfig();
+
+        $this->app->singleton(AgentConfig::class, $this->getAgentConfigInstance());
 
         $this->commands([
             DeployCommand::class,
@@ -101,15 +102,9 @@ class AgentServiceProvider extends ServiceProvider
      */
     protected function getLarashedApiInstance()
     {
-        return function () {
+        return function ($app) {
             return new LarashedApi(
-                new Config(
-                    config('larashed.application_id'),
-                    config('larashed.application_key'),
-                    config('app.env'),
-                    config('larashed.url'),
-                    config('larashed.verify-ssl')
-                )
+                $app[AgentConfig::class]
             );
         };
     }
@@ -119,7 +114,7 @@ class AgentServiceProvider extends ServiceProvider
      */
     protected function getTransportInstance()
     {
-        return function ($app) {
+        return function () {
             $transport = config('larashed.transport.default');
             switch ($transport) {
                 case 'socket':
@@ -131,6 +126,21 @@ class AgentServiceProvider extends ServiceProvider
             }
 
             throw new \InvalidArgumentException('Invalid Larashed configuration. Unknown transport: ' . $transport);
+        };
+    }
+
+    protected function getAgentConfigInstance()
+    {
+        return function () {
+            return new AgentConfig(
+                config('larashed.application_id'),
+                config('larashed.application_key'),
+                config('app.env'),
+                config('larashed.directory'),
+                config('larashed.transport.engines.socket.file'),
+                config('larashed.url'),
+                config('larashed.verify-ssl')
+            );
         };
     }
 
