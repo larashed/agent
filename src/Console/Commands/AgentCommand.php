@@ -4,7 +4,9 @@ namespace Larashed\Agent\Console\Commands;
 
 use Illuminate\Console\Command;
 use Larashed\Agent\Agent;
+use Larashed\Agent\AgentConfig;
 use Larashed\Agent\Api\LarashedApi;
+use Larashed\Agent\Console\GoAgent;
 use Larashed\Agent\Trackers\ApplicationEnvironmentTracker;
 use Larashed\Agent\Trackers\ServerInformationTracker;
 use Symfony\Component\Process\Process;
@@ -67,17 +69,7 @@ class AgentCommand extends Command
             exit;
         }
 
-        $storageDirectory = storage_path(
-            rtrim(config('larashed.directory'), '/') . '/'
-        );
-
-        $executableDir = $storageDirectory . 'bin/';
-        $executablePath = $executableDir . 'agent';
-
-        $socketPath = $storageDirectory . trim(config('larashed.transport.engines.socket.file'), '/');
-
-        $this->downloadAgent($executableDir, $executablePath);
-        $this->runAgent($socketPath, $executablePath);
+        $this->runAgent();
     }
 
     /**
@@ -98,58 +90,10 @@ class AgentCommand extends Command
         $this->api->sendServerInformation($data);
     }
 
-    /**
-     * @param $socketPath
-     * @param $executablePath
-     */
-    protected function runAgent($socketPath, $executablePath)
+    protected function runAgent()
     {
-        $arguments = [
-            $executablePath, 'daemon',
-            '--socket=' . $socketPath,
-            '--env=' . config('app.env'),
-            '--app-id=' . config('larashed.application_id'),
-            '--app-key=' . config('larashed.application_key'),
-            '--api-url=' . config('larashed.url'),
-        ];
-
-        $process = new Process($arguments, null, null, null, null);
-
-        $this->info('Running: ' . $process->getCommandLine());
-
-        $process->run(function ($type, $buffer) {
-            if (Process::ERR === $type) {
-                $this->error($buffer);
-            } else {
-                $this->info($buffer);
-            }
-        });
-
-        $this->info($process->getOutput());
-        $this->error($process->getErrorOutput());
-    }
-
-    /**
-     * @param $executableDir
-     * @param $executablePath
-     */
-    protected function downloadAgent($executableDir, $executablePath)
-    {
-        // @TODO improve this to enable upgrades
-        if (file_exists($executablePath)) {
-            return;
-        }
-
-        $this->line("Agent binary not found. Downloading.");
-
-        $url = 'https://github.com/larashed/agent-go/releases/latest/download/agent_linux_amd64';
-
-        mkdir($executableDir, 0777, true);
-
-        copy($url, $executablePath);
-        $this->line("Downloaded.");
-        $this->line("Setting permissions");
-        chmod($executablePath, 777);
-        $this->line("Done. Agent binary ready.");
+        $agent = new GoAgent(app(AgentConfig::class), $this);
+        $agent->installOrUpgrade();
+        $agent->runDaemonCommand();
     }
 }
