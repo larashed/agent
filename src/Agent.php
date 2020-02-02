@@ -2,8 +2,8 @@
 
 namespace Larashed\Agent;
 
-use Larashed\Agent\Storage\StorageInterface;
 use Larashed\Agent\Trackers\TrackerInterface;
+use Larashed\Agent\Transport\TransportInterface;
 
 /**
  * Class Agent
@@ -13,9 +13,9 @@ use Larashed\Agent\Trackers\TrackerInterface;
 class Agent
 {
     /**
-     * @var StorageInterface
+     * @var TransportInterface
      */
-    protected $storage;
+    protected $transport;
 
     /**
      * @var TrackerInterface[]
@@ -25,11 +25,11 @@ class Agent
     /**
      * Agent constructor.
      *
-     * @param StorageInterface $storage
+     * @param TransportInterface $storage
      */
-    public function __construct(StorageInterface $storage)
+    public function __construct(TransportInterface $storage)
     {
-        $this->storage = $storage;
+        $this->transport = $storage;
     }
 
     /**
@@ -67,6 +67,19 @@ class Agent
             $tracker->cleanup();
         });
 
-        $this->storage->push($data);
+        $this->transport->push($data);
+    }
+
+    public static function isEnabled()
+    {
+        $envs = collect(explode(",", config('larashed.ignored_environments')))
+            ->map(function ($env) {
+                return trim($env);
+            })
+            ->reject(function ($env) {
+                return empty(trim($env));
+            })->toArray();
+
+        return !in_array(config('app.env'), $envs);
     }
 }

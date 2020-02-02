@@ -79,7 +79,12 @@ class Request
     protected function getUserData()
     {
         $data = ['id' => 0, 'name' => null];
-        $guard = config('larashed.auth.guard', config('auth.defaults.guard'));
+
+        if (!config('larashed.user.enabled')) {
+            return $data;
+        }
+
+        $guard = config('larashed.user.guard', config('auth.defaults.guard'));
 
         $user = $this->request->user($guard);
 
