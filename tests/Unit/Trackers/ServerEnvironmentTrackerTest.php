@@ -11,7 +11,7 @@ use Larashed\Agent\Trackers\Server\LoadAverageCollector;
 use Larashed\Agent\Trackers\Server\MemoryCollector;
 use Larashed\Agent\Trackers\Server\ServiceCollector;
 use Larashed\Agent\Trackers\Server\SystemEnvironmentCollector;
-use Larashed\Agent\Trackers\ServerEnvironmentTracker;
+use Larashed\Agent\Trackers\ApplicationEnvironmentTracker;
 use Orchestra\Testbench\TestCase;
 use Larashed\Agent\Tests\Traits\MeasurementsMock;
 
@@ -28,13 +28,13 @@ class ServerEnvironmentTrackerTest extends TestCase
     {
         $this->expectException(\RuntimeException::class);
 
-        $tracker = $this->getServerEnvironmentTrackerInstance(false);
+        $tracker = $this->getApplicationEnvironmentTrackerInstance(false);
         $tracker->bind();
     }
 
     public function testGatherReturnsRequiredStructure()
     {
-        $tracker = $this->getServerEnvironmentTrackerInstance();
+        $tracker = $this->getApplicationEnvironmentTrackerInstance();
         $tracker->bind();
 
         $data = $tracker->gather();
@@ -43,7 +43,6 @@ class ServerEnvironmentTrackerTest extends TestCase
 
         $this->assertArrayHasKey('app', $data);
         $this->assertArrayHasKey('name', $data['app']);
-        $this->assertArrayHasKey('env', $data['app']);
         $this->assertArrayHasKey('url', $data['app']);
         $this->assertArrayHasKey('drivers', $data['app']);
         $this->assertArrayHasKey('laravel_version', $data['app']);
@@ -52,51 +51,12 @@ class ServerEnvironmentTrackerTest extends TestCase
         $this->assertArrayHasKey('database', $data['app']['drivers']);
         $this->assertArrayHasKey('cache', $data['app']['drivers']);
         $this->assertArrayHasKey('mail', $data['app']['drivers']);
-
-        $this->assertArrayHasKey('system', $data);
-        $this->assertArrayHasKey('reboot_required', $data['system']);
-        $this->assertArrayHasKey('php_version', $data['system']);
-        $this->assertArrayHasKey('hostname', $data['system']);
-        $this->assertArrayHasKey('uptime', $data['system']);
-        $this->assertArrayHasKey('os', $data['system']);
-
-        $this->assertArrayHasKey('id', $data['system']['os']);
-        $this->assertArrayHasKey('name', $data['system']['os']);
-        $this->assertArrayHasKey('pretty_name', $data['system']['os']);
-        $this->assertArrayHasKey('version', $data['system']['os']);
-
-        $this->assertArrayHasKey('services', $data['system']);
-
-        $this->assertArrayHasKey('resources', $data);
-        $this->assertArrayHasKey('cpu', $data['resources']);
-        $this->assertArrayHasKey('load', $data['resources']);
-        $this->assertArrayHasKey('memory_free', $data['resources']);
-        $this->assertArrayHasKey('memory_total', $data['resources']);
-        $this->assertArrayHasKey('disk_total', $data['resources']);
-        $this->assertArrayHasKey('disk_free', $data['resources']);
     }
 
-    protected function getServerEnvironmentTrackerInstance($cli = true)
+    protected function getApplicationEnvironmentTrackerInstance($cli = true)
     {
         $app = \Mockery::mock(Application::class);
         $app->shouldReceive('runningInConsole')->andReturn($cli);
-
-        $service = \Mockery::mock(ServiceCollector::class);
-        $service->shouldReceive('services')->andReturn(['service1']);
-
-        $memory = \Mockery::mock(MemoryCollector::class);
-        $memory->shouldReceive('free')->andReturn(1024);
-        $memory->shouldReceive('total')->andReturn(2048);
-
-        $disk = \Mockery::mock(DiskCollector::class);
-        $disk->shouldReceive('free')->andReturn(1);
-        $disk->shouldReceive('total')->andReturn(2);
-
-        $cpu = \Mockery::mock(CPUUsageCollector::class);
-        $cpu->shouldReceive('cpu')->andReturn(1);
-
-        $load = \Mockery::mock(LoadAverageCollector::class);
-        $load->shouldReceive('load')->andReturn([0,1,2]);
 
         $laravel = \Mockery::mock(LaravelEnvironmentCollector::class);
         $laravel->shouldReceive('appName')->andReturn('');
@@ -109,24 +69,10 @@ class ServerEnvironmentTrackerTest extends TestCase
         $laravel->shouldReceive('mailDriver')->andReturn('');
         $laravel->shouldReceive('laravelVersion')->andReturn('');
 
-        $system = \Mockery::mock(SystemEnvironmentCollector::class);
-        $system->shouldReceive('rebootRequired')->andReturn(false);
-        $system->shouldReceive('phpVersion')->andReturn('');
-        $system->shouldReceive('hostname')->andReturn('');
-        $system->shouldReceive('uptime')->andReturn('uptime');
-        $system->shouldReceive('loadAverage')->andReturn([0,1,2]);
-        $system->shouldReceive('osInformation')->andReturn(['id' => '', 'name' => '', 'pretty_name' => '', 'version' => '']);
-
-        $tracker = new ServerEnvironmentTracker(
+        $tracker = new ApplicationEnvironmentTracker(
             $app,
             $this->getMeasurementsMock(),
-            $service,
-            $memory,
-            $disk,
-            $cpu,
-            $load,
-            $laravel,
-            $system
+            $laravel
         );
 
         return $tracker;

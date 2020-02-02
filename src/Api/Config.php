@@ -45,8 +45,13 @@ class Config
      * @param string $url
      * @param bool   $cert
      */
-    public function __construct($applicationId, $applicationKey, $environment, $url = 'https://api.larashed.com/', $cert = true)
-    {
+    public function __construct(
+        $applicationId,
+        $applicationKey,
+        $environment,
+        $url = 'https://api.larashed.com/',
+        $cert = true
+    ) {
         $this->applicationId = $applicationId;
         $this->applicationKey = $applicationKey;
         $this->environment = $environment;

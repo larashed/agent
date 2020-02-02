@@ -1,15 +1,15 @@
 <?php
 
-namespace Larashed\Agent\Storage;
+namespace Larashed\Agent\Transport;
 
 use Illuminate\Support\Collection;
 
 /**
- * Interface StorageInterface
+ * Interface TransportInterface
  *
- * @package Larashed\Agent\Storage
+ * @package Larashed\Agent\Transport
  */
-interface StorageInterface
+interface TransportInterface
 {
     /**
      * @param array $record
