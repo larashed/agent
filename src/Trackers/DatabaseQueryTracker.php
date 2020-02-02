@@ -3,11 +3,11 @@
 namespace Larashed\Agent\Trackers;
 
 use Closure;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Support\Facades\DB;
+use Larashed\Agent\System\Measurements;
 use Larashed\Agent\Trackers\Database\Query;
 use Larashed\Agent\Trackers\Database\QueryExcluder;
-use Larashed\Agent\System\Measurements;
 
 /**
  * Class DatabaseQueryTracker

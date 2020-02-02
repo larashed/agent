@@ -3,7 +3,7 @@
 namespace Larashed\Agent\Tests\Unit;
 
 use Larashed\Agent\Agent;
-use Larashed\Agent\Storage\StorageInterface;
+use Larashed\Agent\Transport\TransportInterface;
 use Larashed\Agent\Trackers\TrackerInterface;
 use Orchestra\Testbench\TestCase;
 
@@ -11,7 +11,7 @@ class AgentTest extends TestCase
 {
     public function testAgentStartTriggersAllTrackerBindings()
     {
-        $agent = new Agent(\Mockery::mock(StorageInterface::class));
+        $agent = new Agent(\Mockery::mock(TransportInterface::class));
 
         $tracker1BindCalled = false;
         $tracker1 = $this->getTrackerMock(
@@ -42,7 +42,7 @@ class AgentTest extends TestCase
     public function testAgentStopGathersDataFromAllTrackersAndStoresIt()
     {
         $collectedData = [];
-        $storage = \Mockery::mock(StorageInterface::class);
+        $storage = \Mockery::mock(TransportInterface::class);
         $storage->shouldReceive('push')->andReturnUsing(function ($data) use (&$collectedData) {
             $expected = [
                 'first'  => ['tracker1'],
@@ -76,7 +76,7 @@ class AgentTest extends TestCase
 
     public function testAgentStopCleansUpAllTrackers()
     {
-        $agent = new Agent(\Mockery::mock(StorageInterface::class, ['push' => null]));
+        $agent = new Agent(\Mockery::mock(TransportInterface::class, ['push' => null]));
 
         $cleanCalled1 = false;
         $cleanCalled2 = false;

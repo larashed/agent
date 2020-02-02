@@ -2,26 +2,22 @@
 
 namespace Larashed\Agent;
 
-use Illuminate\Contracts\Filesystem\Filesystem;
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Contracts\Http\Kernel as HttpKernel;
+use Illuminate\Support\ServiceProvider;
 use Larashed\Agent\Api\Config;
 use Larashed\Agent\Api\LarashedApi;
-use Larashed\Agent\Console\DaemonRestartHandler;
-use Larashed\Agent\Storage\StorageInterface;
-use Larashed\Agent\Storage\FileStorage;
-use Larashed\Agent\System\System;
+use Larashed\Agent\Console\Commands\AgentCommand;
+use Larashed\Agent\Console\Commands\DeployCommand;
+use Larashed\Agent\Http\Middlewares\RequestTrackerMiddleware;
+use Larashed\Agent\System\Measurements;
+use Larashed\Agent\Trackers\Database\QueryExcluder;
+use Larashed\Agent\Trackers\Database\QueryExcluderConfig;
 use Larashed\Agent\Trackers\DatabaseQueryTracker;
 use Larashed\Agent\Trackers\HttpRequestTracker;
 use Larashed\Agent\Trackers\QueueJobTracker;
 use Larashed\Agent\Trackers\WebhookRequestTracker;
-use Larashed\Agent\Trackers\Database\QueryExcluder;
-use Larashed\Agent\Trackers\Database\QueryExcluderConfig;
-use Larashed\Agent\System\Measurements;
-use Larashed\Agent\Console\Commands\ServerCommand;
-use Larashed\Agent\Console\Commands\DeployCommand;
-use Larashed\Agent\Console\Commands\DaemonCommand;
-use Larashed\Agent\Http\Middlewares\RequestTrackerMiddleware;
+use Larashed\Agent\Transport\DomainSocketTransport;
+use Larashed\Agent\Transport\TransportInterface;
 
 class AgentServiceProvider extends ServiceProvider
 {
@@ -32,7 +28,7 @@ class AgentServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        if ($this->isEnabled()) {
+        if (Agent::isEnabled()) {
             $this->app[Agent::class]->start();
         }
     }
@@ -46,26 +42,34 @@ class AgentServiceProvider extends ServiceProvider
     {
         $this->loadConfig();
 
-        if (!$this->isEnabled()) {
+        $this->commands([
+            DeployCommand::class,
+            AgentCommand::class,
+        ]);
+
+        if (!Agent::isEnabled()) {
             return;
         }
 
-        $this->app->singleton(StorageInterface::class, $this->getStorageInstance());
+        $this->app->singleton(Measurements::class);
+        $this->app->singleton(TransportInterface::class, $this->getTransportInstance());
         $this->app->singleton(LarashedApi::class, $this->getLarashedApiInstance());
-        $this->app->singleton(Agent::class, $this->getAgentInstance());
         $this->app->singleton(RequestTrackerMiddleware::class);
-        $this->app->singleton(DaemonRestartHandler::class, function($app) {
-            return new DaemonRestartHandler($app[Filesystem::class], config('larashed.restart-file'));
-        });
-
-        $this->commands([
-            DaemonCommand::class,
-            DeployCommand::class,
-            ServerCommand::class
-        ]);
+        $this->app->singleton(Agent::class, $this->getAgentInstance());
 
         $this->loadMiddlewares();
         $this->loadRoutes();
+    }
+
+    /**
+     * Load Larashed config
+     */
+    protected function loadConfig()
+    {
+        $this->mergeConfigFrom(__DIR__ . '/../install-stubs/config/larashed.php', 'larashed');
+        $this->publishes([
+            __DIR__ . '/../install-stubs/config/' => config_path()
+        ], 'larashed');
     }
 
     /**
@@ -91,17 +95,6 @@ class AgentServiceProvider extends ServiceProvider
     }
 
     /**
-     * Load Larashed config
-     */
-    protected function loadConfig()
-    {
-        $this->mergeConfigFrom(__DIR__ . '/../install-stubs/config/larashed.php', 'larashed');
-        $this->publishes([
-            __DIR__ . '/../install-stubs/config/' => config_path()
-        ], 'larashed');
-    }
-
-    /**
      * Builds Larashed API client
      *
      * @return \Closure
@@ -124,16 +117,20 @@ class AgentServiceProvider extends ServiceProvider
     /**
      * @return \Closure
      */
-    protected function getStorageInstance()
+    protected function getTransportInstance()
     {
         return function ($app) {
-            $storage = new FileStorage(
-                $app['filesystem'],
-                config('larashed.storage.engines.file.disk'),
-                config('larashed.storage.engines.file.directory')
-            );
+            $transport = config('larashed.transport.default');
+            switch ($transport) {
+                case 'socket':
+                    $dir = config('larashed.directory');
 
-            return $storage;
+                    return new DomainSocketTransport(
+                        storage_path($dir . DIRECTORY_SEPARATOR . config('larashed.transport.engines.socket.file'))
+                    );
+            }
+
+            throw new \InvalidArgumentException('Invalid Larashed configuration. Unknown transport: ' . $transport);
         };
     }
 
@@ -145,24 +142,15 @@ class AgentServiceProvider extends ServiceProvider
     protected function getAgentInstance()
     {
         return function ($app) {
-            $measurements = new Measurements();
             $queryExcluder = new QueryExcluder(QueryExcluderConfig::fromConfig());
 
-            $agent = new Agent($app[StorageInterface::class]);
-            $agent->addTracker('queries', new DatabaseQueryTracker($measurements, $queryExcluder));
-            $agent->addTracker('job', new QueueJobTracker($agent, $measurements));
-            $agent->addTracker('request', new HttpRequestTracker($app['events'], $measurements));
-            $agent->addTracker('webhook', new WebhookRequestTracker($app['events'], $measurements));
+            $agent = new Agent($app[TransportInterface::class]);
+            $agent->addTracker('queries', new DatabaseQueryTracker($app[Measurements::class], $queryExcluder));
+            $agent->addTracker('job', new QueueJobTracker($agent, $app[Measurements::class]));
+            $agent->addTracker('request', new HttpRequestTracker($app['events'], $app[Measurements::class]));
+            $agent->addTracker('webhook', new WebhookRequestTracker($app['events'], $app[Measurements::class]));
 
             return $agent;
         };
-    }
-
-    /**
-     * @return bool
-     */
-    protected function isEnabled()
-    {
-        return !in_array(config('app.env'), config('larashed.ignore_environments', []));
     }
 }
