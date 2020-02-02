@@ -1,8 +1,8 @@
 <?php
 
 namespace Larashed\Agent\Trackers\Server;
-use Illuminate\Foundation\Application;
 
+use Illuminate\Foundation\Application;
 
 /**
  * Class EnvironmentCollector
