@@ -8,6 +8,7 @@ use Larashed\Agent\Api\LarashedApi;
 use Larashed\Agent\Console\Commands\AgentCommand;
 use Larashed\Agent\Console\Commands\DeployCommand;
 use Larashed\Agent\Http\Middlewares\RequestTrackerMiddleware;
+use Larashed\Agent\Ipc\SocketClient;
 use Larashed\Agent\System\Measurements;
 use Larashed\Agent\Trackers\Database\QueryExcluder;
 use Larashed\Agent\Trackers\Database\QueryExcluderConfig;
@@ -53,6 +54,7 @@ class AgentServiceProvider extends ServiceProvider
         }
 
         $this->app->singleton(Measurements::class);
+        $this->app->singleton(SocketClient::class, $this->getSocketClientInstance());
         $this->app->singleton(TransportInterface::class, $this->getTransportInstance());
         $this->app->singleton(LarashedApi::class, $this->getLarashedApiInstance());
         $this->app->singleton(RequestTrackerMiddleware::class);
@@ -114,18 +116,26 @@ class AgentServiceProvider extends ServiceProvider
      */
     protected function getTransportInstance()
     {
-        return function () {
+        return function ($app) {
             $transport = config('larashed.transport.default');
             switch ($transport) {
                 case 'socket':
-                    $dir = config('larashed.directory');
-
                     return new DomainSocketTransport(
-                        storage_path($dir . DIRECTORY_SEPARATOR . config('larashed.transport.engines.socket.file'))
+                        $app[SocketClient::class]
                     );
             }
 
             throw new \InvalidArgumentException('Invalid Larashed configuration. Unknown transport: ' . $transport);
+        };
+    }
+
+    protected function getSocketClientInstance()
+    {
+        return function () {
+            $dir = config('larashed.directory');
+            $socketPath = storage_path($dir . DIRECTORY_SEPARATOR . config('larashed.transport.engines.socket.file'));
+
+            return new SocketClient($socketPath);
         };
     }
 
