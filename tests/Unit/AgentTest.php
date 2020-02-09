@@ -41,7 +41,6 @@ class AgentTest extends TestCase
 
     public function testAgentStopGathersDataFromAllTrackersAndStoresIt()
     {
-        $collectedData = [];
         $storage = \Mockery::mock(TransportInterface::class);
         $storage->shouldReceive('push')->andReturnUsing(function ($data) use (&$collectedData) {
             $expected = [
