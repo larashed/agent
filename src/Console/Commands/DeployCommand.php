@@ -6,8 +6,10 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Larashed\Agent\Agent;
+use Larashed\Agent\AgentConfig;
 use Larashed\Agent\Api\LarashedApi;
 use Larashed\Agent\Api\LarashedApiException;
+use Larashed\Agent\Console\GoAgent;
 use Larashed\Agent\System\Measurements;
 use Larashed\Agent\System\System;
 
@@ -65,6 +67,19 @@ class DeployCommand extends Command
             $this->sendDeployment();
         } catch (LarashedApiException $exception) {
             $this->error('Failed to send deployment data: ' . $exception->getMessage());
+        }
+
+        $this->signalAgentQuitForUpdate();
+    }
+
+    /**
+     * Check if installed
+     */
+    protected function signalAgentQuitForUpdate()
+    {
+        $agent = new GoAgent(app(AgentConfig::class));
+        if ($agent->isInstalled() && $agent->hasUpdate()) {
+            $agent->signalQuit();
         }
     }
 
