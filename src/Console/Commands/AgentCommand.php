@@ -23,7 +23,7 @@ class AgentCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'larashed:agent';
+    protected $signature = 'larashed:agent {--no-update}';
 
     /**
      * The console command description.
@@ -92,8 +92,21 @@ class AgentCommand extends Command
 
     protected function runAgent()
     {
-        $agent = new GoAgent(app(AgentConfig::class), $this);
-        $agent->installOrUpgrade();
-        $agent->runDaemonCommand();
+        $agent = new GoAgent(app(AgentConfig::class));
+        if ($this->option('no-update')) {
+            $agent->run();
+
+            return;
+        }
+
+        if (!$agent->isInstalled()) {
+            $agent->install();
+        } else {
+            if ($agent->hasUpdate()) {
+                $agent->update();
+            }
+        }
+
+        $agent->run();
     }
 }

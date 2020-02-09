@@ -5,6 +5,7 @@ namespace Larashed\Agent\Console;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Larashed\Agent\AgentConfig;
+use Larashed\Agent\Ipc\SocketClient;
 use Symfony\Component\Process\Process;
 
 /**
@@ -20,153 +21,24 @@ class GoAgent
     protected $config;
 
     /**
-     * @var Command
+     * @var string
      */
-    protected $command;
+    protected $latestVersion;
 
     /**
      * GoAgent constructor.
      *
      * @param AgentConfig $config
-     * @param Command     $command
      */
-    public function __construct(AgentConfig $config, Command $command)
+    public function __construct(AgentConfig $config)
     {
         $this->config = $config;
-        $this->command = $command;
     }
 
     /**
-     * Run agent-go daemon
+     * Run `agent-go daemon ...`
      */
-    public function runDaemonCommand()
-    {
-        $process = new Process($this->getDaemonCommandArguments(), null, null, null, null);
-        $process->run(function ($type, $buffer) {
-            if (Process::ERR === $type) {
-                $this->command->error(trim($buffer));
-            } else {
-                $this->command->info(trim($buffer));
-            }
-        });
-
-        $this->command->info($process->getOutput());
-        $this->command->error($process->getErrorOutput());
-    }
-
-    /**
-     * Run agent-go version --json command
-     */
-    public function getInstalledVersionTag()
-    {
-        $process = new Process($this->getVersionCommandArguments(), null, null, null, null);
-        $process->run();
-
-        $output = json_decode(trim($process->getOutput()), true);
-        if ($output) {
-            return $output['tag'];
-        }
-
-        return null;
-    }
-
-    /**
-     * Install, upgrade and configure agent-go executable
-     */
-    public function installOrUpgrade()
-    {
-        $latestVersion = $this->getLatestVersionTag();
-
-        if (file_exists($this->config->getGoAgentPath())) {
-            $this->command->line("Found an existing agent binary. Checking if upgrade is needed.");
-
-            $installedVersion = $this->getInstalledVersionTag();
-            if ($latestVersion == $installedVersion) {
-                $this->command->line("Installed agent is already at the latest (v" . $installedVersion . ") version.");
-
-                return;
-            }
-
-            $this->command->line("Starting upgrade.");
-        }
-
-        if (!is_dir($this->config->getGoAgentDirectory())) {
-            $this->command->line("Agent executable directory doesn't exist. Creating.");
-
-            if (!mkdir($this->config->getGoAgentDirectory(), 0777, true)) {
-                $this->command->error("Failed to create " . $this->config->getGoAgentDirectory() . " dir for agent executable.");
-
-                return;
-            }
-        }
-
-        if (file_exists($this->config->getGoAgentPath())) {
-            $this->command->line("Removing old version.");
-            if (!unlink($this->config->getGoAgentPath())) {
-                $this->command->line("Failed to delete the old version.");
-
-                return;
-            }
-        }
-
-        $this->command->line("Downloading agent v" . $latestVersion);
-
-        $agentUrl = $this->config->getGoAgentDownloadUrl($latestVersion);
-        if (!copy($agentUrl, $this->config->getGoAgentPath())) {
-            $this->command->error("Failed to download agent.");
-
-            return;
-        }
-
-        $this->command->line("Downloaded.");
-        $this->command->line("Setting permissions.");
-
-        if (!chmod($this->config->getGoAgentPath(), 0777)) {
-            $this->command->error("Failed to set permissions on agent executable.");
-
-            return;
-        }
-
-        $this->command->line("Done. Agent binary ready.");
-    }
-
-    /**
-     * @return mixed|string
-     */
-    protected function getLatestVersionTag()
-    {
-        $tag = 'latest';
-
-        if ($response = $this->doGetRequest($this->config->getGoAgentLatestVersionUrl())) {
-            $version = json_decode($response, true);
-
-            $tag = Arr::get($version, 'tag_name');
-        }
-
-        return $tag;
-    }
-
-
-    /**
-     * @return array
-     */
-    protected function getVersionCommandArguments()
-    {
-        $command = 'version';
-
-        $arguments = [
-            $this->config->getGoAgentPath(),
-            $command,
-            '--json',
-        ];
-
-        return $arguments;
-    }
-
-    /**
-     * @return array
-     */
-    protected function getDaemonCommandArguments()
+    public function run()
     {
         $command = 'daemon';
 
@@ -180,7 +52,179 @@ class GoAgent
             '--api-url=' . $this->config->getBaseApiUrl(),
         ];
 
-        return $arguments;
+        $process = new Process($arguments, null, null, null, null);
+
+        try {
+            $process->run(function ($type, $buffer) {
+                if (Process::ERR === $type) {
+                    $this->print(trim($buffer));
+                } else {
+                    $this->print(trim($buffer));
+                }
+            });
+        } catch (\Exception $exception) {
+            $this->print("Agent quit - " . $exception->getMessage());
+        }
+
+        $this->print($process->getErrorOutput());
+    }
+
+    public function update()
+    {
+        $this->signalQuit();
+
+        if (!$this->deleteExistingAgent()) {
+            $this->print("Failed to delete existing agent.");
+
+            return;
+        }
+
+        if (!$this->download($this->getLatestVersionTag())) {
+            $this->print("Failed to download the latest agent.");
+
+            return;
+        }
+
+        if (!$this->setPermissions()) {
+            $this->print("Failed to set executable permissions");
+
+            return;
+        }
+
+        $this->print("Agent binary updated to v" . $this->latestVersion . ".");
+    }
+
+    public function install()
+    {
+        if (!$this->createDirectories()) {
+            $this->print("Creating directories.");
+
+            return;
+        }
+
+        if (!$this->deleteExistingAgent()) {
+            $this->print("Failed to delete existing agent.");
+
+            return;
+        }
+
+        if (!$this->download($this->getLatestVersionTag())) {
+            $this->print("Failed to download the latest agent.");
+
+            return;
+        }
+
+        if (!$this->setPermissions()) {
+            $this->print("Failed to set executable permissions");
+
+            return;
+        }
+
+        $this->print("Agent (v" . $this->latestVersion . ") binary installed.");
+    }
+
+    public function signalQuit()
+    {
+        /** @var SocketClient $client */
+        $client = app(SocketClient::class);
+        $client->send(SocketClient::QUIT);
+    }
+
+    public function isInstalled()
+    {
+        return file_exists($this->config->getGoAgentPath());
+    }
+
+    public function hasUpdate()
+    {
+        $latestVersion = $this->getLatestVersionTag();
+        $installedVersion = $this->getInstalledAgentVersion();
+
+        return $latestVersion !== $installedVersion;
+    }
+
+    public function getLatestVersionTag()
+    {
+        if (!is_null($this->latestVersion)) {
+            return $this->latestVersion;
+        }
+
+        if ($response = $this->doGetRequest($this->config->getGoAgentLatestVersionUrl())) {
+            $version = json_decode($response, true);
+
+            $this->latestVersion = Arr::get($version, 'tag_name');
+        }
+
+        return $this->latestVersion;
+    }
+
+    protected function deleteExistingAgent()
+    {
+        if (file_exists($this->config->getGoAgentPath())) {
+            if (!unlink($this->config->getGoAgentPath())) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    protected function createDirectories()
+    {
+        if (!is_dir($this->config->getGoAgentDirectory())) {
+            if (!mkdir($this->config->getGoAgentDirectory(), 0777, true)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    protected function setPermissions()
+    {
+        if (!chmod($this->config->getGoAgentPath(), 0777)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    protected function download($version)
+    {
+        $url = $this->config->getGoAgentDownloadUrl($version);
+        if (!copy($url, $this->config->getGoAgentPath())) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Runs `agent version --json` command
+     */
+    protected function getInstalledAgentVersion()
+    {
+        $command = 'version';
+
+        $arguments = [
+            $this->config->getGoAgentPath(),
+            $command,
+            '--json',
+        ];
+
+        $process = new Process($arguments, null, null, null, null);
+        try {
+            $process->run();
+        } catch (\Exception $exception) {
+            $this->print("Version command failed - " . $exception->getMessage());
+        }
+
+        $output = json_decode(trim($process->getOutput()), true);
+        if ($output) {
+            return $output['tag'];
+        }
+
+        return null;
     }
 
     protected function doGetRequest($url)
@@ -195,5 +239,10 @@ class GoAgent
         curl_close($curl);
 
         return $resp;
+    }
+
+    protected function print($message)
+    {
+        echo $message, PHP_EOL;
     }
 }
