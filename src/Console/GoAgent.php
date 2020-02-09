@@ -9,6 +9,7 @@ use Symfony\Component\Process\Process;
 
 /**
  * Class GoAgent
+ *
  * @package Larashed\Agent\Console
  */
 class GoAgent
@@ -184,17 +185,13 @@ class GoAgent
 
     protected function doGetRequest($url)
     {
-        // Get cURL resource
         $curl = curl_init();
-        // Set some options - we are passing in a useragent too here
         curl_setopt_array($curl, [
             CURLOPT_RETURNTRANSFER => 1,
             CURLOPT_URL            => $url,
             CURLOPT_USERAGENT      => 'Larashed/Agent v1.0'
         ]);
-        // Send the request & save response to $resp
         $resp = curl_exec($curl);
-        // Close request to clear up some resources
         curl_close($curl);
 
         return $resp;
