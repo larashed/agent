@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 /**
  * Class ExceptionTransformer
  *
- * @package Larashed\Agent\Helpers
+ * @package Larashed\Agent\Errors
  */
 class ExceptionTransformer
 {

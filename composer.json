@@ -27,7 +27,7 @@
     "phpunit/phpunit": "^8.0",
     "orchestra/testbench": "4.*",
     "mockery/mockery": "^1.0",
-    "dms/phpunit-arraysubset-asserts": "dev-master"
+    "dms/phpunit-arraysubset-asserts": "^0.1"
   },
   "autoload": {
     "psr-4": {
