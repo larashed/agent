@@ -19,11 +19,6 @@ class ExceptionTransformer
     protected $exception;
 
     /**
-     * @var array
-     */
-    protected $ignoredNamespaces = ['App\Http\Controllers', 'App\Jobs'];
-
-    /**
      * ExceptionTransformer constructor.
      *
      * @param \Exception $exception
@@ -31,18 +26,6 @@ class ExceptionTransformer
     public function __construct(Exception $exception)
     {
         $this->exception = $exception;
-    }
-
-    /**
-     * @param $namespaces
-     *
-     * @return $this
-     */
-    public function setIgnoredNamespaces($namespaces)
-    {
-        $this->ignoredNamespaces = (array) $namespaces;
-
-        return $this;
     }
 
     /**
@@ -86,13 +69,9 @@ class ExceptionTransformer
                 $codeSnippet = (new CodeSnippet($trace['file'], $trace['line']))->get();
             }
 
-            $line = Arr::add($line, 'snippet', $codeSnippet);
+            $line['snippet'] = $codeSnippet;
 
             $lines[] = $line;
-
-            if (Str::contains(Arr::get($line, 'class'), $this->ignoredNamespaces)) {
-                return false;
-            }
         });
         return $lines;
     }
