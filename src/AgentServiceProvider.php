@@ -6,6 +6,7 @@ use Illuminate\Contracts\Http\Kernel as HttpKernel;
 use Illuminate\Support\ServiceProvider;
 use Larashed\Agent\Api\LarashedApi;
 use Larashed\Agent\Console\Commands\AgentCommand;
+use Larashed\Agent\Console\Commands\AgentQuitCommand;
 use Larashed\Agent\Console\Commands\DeployCommand;
 use Larashed\Agent\Http\Middlewares\RequestTrackerMiddleware;
 use Larashed\Agent\Ipc\SocketClient;
@@ -47,6 +48,7 @@ class AgentServiceProvider extends ServiceProvider
         $this->commands([
             DeployCommand::class,
             AgentCommand::class,
+            AgentQuitCommand::class,
         ]);
 
         if (!Agent::isEnabled()) {

@@ -23,7 +23,7 @@ class AgentCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'larashed:agent {--no-update}';
+    protected $signature = 'larashed:agent {--no-update} {--log-level=info}';
 
     /**
      * The console command description.
@@ -92,9 +92,11 @@ class AgentCommand extends Command
 
     protected function runAgent()
     {
+        $logLevel = $this->option('log-level');
+
         $agent = new GoAgent(app(AgentConfig::class));
         if ($this->option('no-update')) {
-            $agent->run();
+            $agent->run($logLevel);
 
             return;
         }
@@ -107,6 +109,6 @@ class AgentCommand extends Command
             }
         }
 
-        $agent->run();
+        $agent->run($logLevel);
     }
 }
