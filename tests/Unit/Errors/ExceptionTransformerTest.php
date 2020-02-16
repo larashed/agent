@@ -28,15 +28,4 @@ class ExceptionTransformerTest extends TestCase
         $this->assertEquals($result[0]['message'], $message);
         $this->assertEquals($result[1]['message'], $previousMessage);
     }
-
-    public function testExceptionTraceSkipsLines()
-    {
-        $exception = new Exception('Exception message');
-
-        $transformer = new ExceptionTransformer($exception);
-        $transformer->setIgnoredNamespaces(['TestCase']);
-        $result = $transformer->toArray();
-
-        $this->assertCount(2, $result[0]['trace']);
-    }
 }
