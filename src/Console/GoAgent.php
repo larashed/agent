@@ -37,8 +37,10 @@ class GoAgent
 
     /**
      * Run `agent-go daemon ...`
+     *
+     * @param $logLevel
      */
-    public function run()
+    public function run($logLevel)
     {
         $command = 'daemon';
 
@@ -50,6 +52,7 @@ class GoAgent
             '--app-id=' . $this->config->getApplicationId(),
             '--app-key=' . $this->config->getApplicationKey(),
             '--api-url=' . $this->config->getBaseApiUrl(),
+            '--log-level=' . $logLevel,
         ];
 
         $process = new Process($arguments, null, null, null, null);
