@@ -61,11 +61,17 @@ class Agent
     public function stop()
     {
         $data = [];
-
         collect($this->trackers)->each(function (TrackerInterface $tracker, $name) use (&$data) {
             $data[$name] = $tracker->gather();
             $tracker->cleanup();
         });
+
+        // remove empty keys
+        foreach ($data as $key => $value) {
+            if (empty($value)) {
+                unset($data[$key]);
+            }
+        }
 
         $this->transport->push($data);
     }

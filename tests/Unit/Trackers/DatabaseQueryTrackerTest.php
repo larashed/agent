@@ -38,8 +38,27 @@ class DatabaseQueryTrackerTest extends TestCase
         event($this->basicQueryEventInstance());
 
         $result = $tracker->gather();
+        $this->assertCount(2, $result['queries']);
+        $this->assertCount(1, $result['groups']);
+        $this->assertEquals('select * from `table` where 1 = 1', $result['groups'][0]);
+        $this->assertEquals(0, $result['queries'][0]['query']);
+    }
 
-        $this->assertCount(2, $result);
+    public function testQueryTrackerBindsAndTracksMultipleDifferentQueries()
+    {
+        $tracker = new DatabaseQueryTracker($this->measurements, $this->excluder);
+        $tracker->bind();
+
+        event($this->queryEventInstance('table_1'));
+        event($this->queryEventInstance('table_2'));
+        event($this->queryEventInstance('table_3'));
+        event($this->queryEventInstance('table_3'));
+        event($this->queryEventInstance('table_4'));
+
+        $result = $tracker->gather();
+        $this->assertCount(5, $result['queries']);
+        $this->assertCount(4, $result['groups']);
+        $this->assertEquals(0, $result['queries'][0]['query']);
     }
 
     public function testQueryTrackerCleansUp()
@@ -49,7 +68,9 @@ class DatabaseQueryTrackerTest extends TestCase
 
         event($this->basicQueryEventInstance());
 
-        $this->assertCount(1, $tracker->gather());
+        $gathered = $tracker->gather();
+
+        $this->assertCount(1, $gathered['queries']);
 
         $tracker->cleanup();
 
@@ -71,6 +92,14 @@ class DatabaseQueryTrackerTest extends TestCase
     protected function basicQueryEventInstance()
     {
         $sql = 'select * from `table` WHERE 1 = 1';
+        $time = 0.32;
+
+        return new QueryExecuted($sql, [], $time, $this->getConnectionMock());
+    }
+
+    protected function queryEventInstance($table)
+    {
+        $sql = 'select * from `'.$table.'` WHERE 1 = 1';
         $time = 0.32;
 
         return new QueryExecuted($sql, [], $time, $this->getConnectionMock());
