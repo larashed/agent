@@ -58,11 +58,15 @@ class DatabaseQueryTracker implements TrackerInterface
      */
     public function gather()
     {
+        if (empty($this->queries)) {
+            return [];
+        }
+
         $queries = collect($this->queries)->map(function (Query $query) {
             return $query->toArray();
         });
 
-        return $queries->toArray();
+        return $this->groupQueries($queries->toArray());
     }
 
     /**
@@ -87,5 +91,34 @@ class DatabaseQueryTracker implements TrackerInterface
                 $this->queries[] = (new Query($this->measurements, $query));
             }
         };
+    }
+
+    /**
+     * Indexes queries so that we can save some bandwidth
+     * and don't need to worry about processing large payloads
+     *
+     * @param $queries
+     *
+     * @return array
+     */
+    protected function groupQueries($queries)
+    {
+        $groups = [];
+
+        foreach ($queries as $key => $query) {
+            $index = array_search($query['query'], $groups);
+            if ($index !== false) {
+                $queries[$key]['query'] = $index;
+                continue;
+            }
+
+            $groups[] = $query['query'];
+            $queries[$key]['query'] = count($groups) - 1;
+        }
+
+        return [
+            'groups'  => $groups,
+            'queries' => $queries
+        ];
     }
 }
