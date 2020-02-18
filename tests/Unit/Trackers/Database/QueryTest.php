@@ -2,14 +2,16 @@
 
 namespace Larashed\Agent\Tests\Unit\Database;
 
+use Larashed\Agent\Tests\Traits\ConnectionMock;
+use Larashed\Agent\Tests\Traits\MeasurementsMock;
 use Orchestra\Testbench\TestCase;
 use Illuminate\Database\Events\QueryExecuted;
 use Larashed\Agent\Trackers\Database\Query;
 
 class QueryTest extends TestCase
 {
-    use \Larashed\Agent\Tests\Traits\MeasurementsMock,
-        \Larashed\Agent\Tests\Traits\ConnectionMock;
+    use MeasurementsMock,
+        ConnectionMock;
 
     protected $measurements;
     protected $queryExecuted;
@@ -19,7 +21,7 @@ class QueryTest extends TestCase
         parent::setUp();
 
         $this->measurements = $this->getMeasurementsMock('2018-01-01', 1, 1);
-        $this->queryExecuted = new QueryExecuted('query', [], 1, $this->getConnectionMock());
+        $this->queryExecuted = new QueryExecuted('SELECT   * FROM table WHERE   1=1', [], 1, $this->getConnectionMock());
     }
 
     public function testQuerySerializesToArray()
@@ -35,7 +37,7 @@ class QueryTest extends TestCase
 
         // test field values
         $expected = [
-            'query'        => 'query',
+            'query'        => 'select * from table where 1=1',
             'created_at'   => '2018-01-01',
             'processed_in' => 1,
             'connection'   => 'database'
