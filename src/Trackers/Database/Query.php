@@ -68,10 +68,28 @@ class Query
     protected function setAttributes(QueryExecuted $query)
     {
         $this->setCreatedAt($this->measurements->time());
-        $this->statement = $query->sql;
+        $this->statement = $this->normalizeStatement($query->sql);
         $this->connection = $query->connectionName;
         $this->processedIn = round($query->time);
 
         return $this;
+    }
+
+    /**
+     * Remove redundant spaces
+     * Remove newlines
+     * Shorten IN (..) clauses
+     *
+     * @param $query
+     *
+     * @return string
+     */
+    protected function normalizeStatement($query)
+    {
+        $query = preg_replace('!\s+!', ' ', mb_strtolower($query));
+        $query = str_replace("\n", "", $query);
+        $query = preg_replace('/\sin\s+\((.*)\s?\)/', ' in (...)', $query);
+
+        return $query;
     }
 }

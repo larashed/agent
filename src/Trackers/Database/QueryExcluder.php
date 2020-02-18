@@ -57,6 +57,6 @@ class QueryExcluder
             ]);
         }
 
-        return str_contains(strtolower($query->sql), $match);
+        return Str::contains(mb_strtolower($query->sql), $match);
     }
 }

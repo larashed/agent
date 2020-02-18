@@ -29,7 +29,7 @@ class SocketClient
         try {
             if (file_exists($this->socketPath)) {
                 $sock = stream_socket_client('unix://' . $this->socketPath, $errorNumber, $errorMessage);
-                fwrite($sock, $message . "\n");
+                fwrite($sock, $message);
             }
         } catch (\Exception $e) {
             // ignore error
