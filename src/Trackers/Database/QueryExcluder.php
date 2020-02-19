@@ -3,6 +3,7 @@
 namespace Larashed\Agent\Trackers\Database;
 
 use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Support\Str;
 
 /**
  * Class QueryExcluder
