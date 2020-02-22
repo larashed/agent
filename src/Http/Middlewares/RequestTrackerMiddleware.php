@@ -2,7 +2,9 @@
 
 namespace Larashed\Agent\Http\Middlewares;
 
+use Illuminate\Support\Str;
 use Larashed\Agent\Agent;
+use Larashed\Agent\AgentConfig;
 use Larashed\Agent\Events\RequestExecuted;
 
 /**
@@ -18,13 +20,20 @@ class RequestTrackerMiddleware
     protected $agent;
 
     /**
+     * @var AgentConfig
+     */
+    protected $config;
+
+    /**
      * Terminating constructor.
      *
-     * @param Agent $agent
+     * @param Agent       $agent
+     * @param AgentConfig $config
      */
-    public function __construct(Agent $agent)
+    public function __construct(Agent $agent, AgentConfig $config)
     {
         $this->agent = $agent;
+        $this->config = $config;
     }
 
     /**
@@ -37,7 +46,10 @@ class RequestTrackerMiddleware
     {
         $response = $next($request);
 
-        event(new RequestExecuted($request, $response));
+        $requestIgnored = Str::contains($request->getUri(), $this->config->getIgnoredEndpoints());
+        if (!$requestIgnored) {
+            event(new RequestExecuted($request, $response));
+        }
 
         return $response;
     }
