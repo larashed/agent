@@ -154,13 +154,29 @@ class AgentConfig
         return $socketPath;
     }
 
-    public function getGoAgentDownloadUrl(string $tag)
+    /**
+     * @param string $tag
+     *
+     * @return string
+     */
+    public function getGoAgentDownloadUrl($tag)
     {
         return 'https://github.com/larashed/agent-go/releases/download/' . $tag . '/agent_linux_amd64';
     }
 
+    /**
+     * @return string
+     */
     public function getGoAgentLatestVersionUrl()
     {
         return 'https://api.github.com/repos/larashed/agent-go/releases/latest';
+    }
+
+    /**
+     * @return array
+     */
+    public function getIgnoredEndpoints()
+    {
+        return config('larashed.ignored_endpoints', []);
     }
 }
