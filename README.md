@@ -14,6 +14,8 @@ This package hooks into your Laravel application and sends monitoring data to [l
 
 ## Version Compatibility
 
+We support all Laravel versions from 5.2.x
+
  Laravel  | Larashed Agent
 :---------|:----------
  5.2.x    | 5.2.x
