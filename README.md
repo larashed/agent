@@ -7,7 +7,7 @@ This package hooks into your Laravel application and sends monitoring data to [l
 
 ---
 * [Version Compatibility](#version-compatibility)
-* [Installation](#installation)
+* [Installation](#user-content-installation-for-laravel-6x)
 * [Usage and Configuration](#usage-and-configuration)
 * [Golang agent](#golang-server-agent)
 * [Release history](https://github.com/larashed/agent/releases)
