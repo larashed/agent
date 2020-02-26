@@ -25,12 +25,20 @@ This package hooks into your Laravel application and sends monitoring data to [l
  5.8.x.   | 5.8.x
  6.x      | 6.x
 
-## Installation
+## Installation for Laravel 6.x
 
 Using the `composer require` command:
 
 ```
 composer require larashed/agent
+```
+
+## Installation for Laravel 5.x
+
+Using the `composer require` command:
+
+```
+composer require larashed/agent:5.x.*
 ```
 
 For Laravel 5.4 and below, add service provider
