@@ -133,9 +133,10 @@ class AgentServiceProvider extends ServiceProvider
 
     protected function getSocketClientInstance()
     {
-        return function () {
-            $dir = config('larashed.directory');
-            $socketPath = storage_path($dir . DIRECTORY_SEPARATOR . config('larashed.transport.engines.socket.file'));
+        return function ($app) {
+            /** @var AgentConfig $config */
+            $config = $app[AgentConfig::class];
+            $socketPath = $config->getSocketPath();
 
             return new SocketClient($socketPath);
         };
@@ -150,6 +151,7 @@ class AgentServiceProvider extends ServiceProvider
                 config('app.env'),
                 config('larashed.directory'),
                 config('larashed.transport.engines.socket.file'),
+                config('larashed.transport.engines.socket.directory'),
                 config('larashed.url'),
                 config('larashed.verify-ssl')
             );

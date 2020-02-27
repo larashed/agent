@@ -24,7 +24,7 @@ return [
     | A list of endpoints which will not be reported
     |
     */
-    'ignored_endpoints' => [
+    'ignored_endpoints'    => [
         '/larashed/health-check',
     ],
 
@@ -52,7 +52,8 @@ return [
         'engines' => [
             'socket' => [
                 // filename for the unix socket within larashed.directory value
-                'file' => 'larashed.sock'
+                'file'      => 'larashed.sock',
+                'directory' => env('LARASHED_SOCKET_DIR', '.')
             ],
         ]
     ],
