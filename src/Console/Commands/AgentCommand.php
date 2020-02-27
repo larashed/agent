@@ -3,13 +3,13 @@
 namespace Larashed\Agent\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Str;
 use Larashed\Agent\Agent;
 use Larashed\Agent\AgentConfig;
 use Larashed\Agent\Api\LarashedApi;
 use Larashed\Agent\Console\GoAgent;
 use Larashed\Agent\Trackers\ApplicationEnvironmentTracker;
 use Larashed\Agent\Trackers\ServerInformationTracker;
-use Symfony\Component\Process\Process;
 
 /**
  * Class AgentCommand
@@ -23,7 +23,7 @@ class AgentCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'larashed:agent {--no-update} {--log-level=info}';
+    protected $signature = 'larashed:agent {--no-update} {--socket= : Domain socket path} {--log-level=info}';
 
     /**
      * The console command description.
@@ -55,6 +55,12 @@ class AgentCommand extends Command
         if (!Agent::isEnabled()) {
             $this->error('Larashed agent is disabled for this environment');
             exit;
+        }
+
+        if (!$this->environmentIsSupported()) {
+            $this->error(PHP_OS . ' OS is not supported. Please contact us.');
+
+            return;
         }
 
         $this->environmentTracker = app(ApplicationEnvironmentTracker::class);
@@ -95,8 +101,10 @@ class AgentCommand extends Command
         $logLevel = $this->option('log-level');
 
         $agent = new GoAgent(app(AgentConfig::class));
+        $socket = $this->option('socket');
+
         if ($this->option('no-update')) {
-            $agent->run($logLevel);
+            $agent->run($socket, $logLevel);
 
             return;
         }
@@ -109,6 +117,13 @@ class AgentCommand extends Command
             }
         }
 
-        $agent->run($logLevel);
+        $agent->run($socket, $logLevel);
+    }
+
+    protected function environmentIsSupported()
+    {
+        $os = strtolower(PHP_OS);
+
+        return !Str::contains($os, ['dar', 'win']);
     }
 }

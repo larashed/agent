@@ -39,6 +39,11 @@ class AgentConfig
     /**
      * @var string
      */
+    protected $socketDir;
+
+    /**
+     * @var string
+     */
     protected $url;
 
     /**
@@ -54,6 +59,7 @@ class AgentConfig
      * @param string $environment
      * @param string $storageDirectory
      * @param string $socketFile
+     * @param string $socketDir
      * @param string $url
      * @param bool   $cert
      */
@@ -63,6 +69,7 @@ class AgentConfig
         $environment,
         $storageDirectory,
         $socketFile,
+        $socketDir,
         $url,
         $cert
     )
@@ -72,6 +79,7 @@ class AgentConfig
         $this->environment = $environment;
         $this->storageDirectory = $storageDirectory;
         $this->socketFile = $socketFile;
+        $this->socketDir = $socketDir;
         $this->url = $url;
         $this->useCertificate = $cert;
     }
@@ -149,19 +157,41 @@ class AgentConfig
      */
     public function getSocketPath()
     {
-        $socketPath = $this->getStorageDirectory() . trim($this->socketFile, '/');
+        $dir = rtrim($this->socketDir, '/') . '/';
 
-        return $socketPath;
+        if ($this->socketDir === '.' || $this->socketDir === './') {
+            $dir = $this->getStorageDirectory();
+        }
+
+        $socket = $dir . trim($this->socketFile, '/');
+
+        return $socket;
     }
 
     /**
-     * @param string $tag
+     * @param $tag
      *
      * @return string
+     *
+     * @throws \Exception
      */
     public function getGoAgentDownloadUrl($tag)
     {
-        return 'https://github.com/larashed/agent-go/releases/download/' . $tag . '/agent_linux_amd64';
+        $binary = $this->goBinaryName();
+
+        return 'https://github.com/larashed/agent-go/releases/download/' . $tag . '/' . $binary;
+    }
+
+    /**
+     * @return string
+     *
+     * @throws \Exception
+     */
+    public function getGoAgentLatestDownloadUrl()
+    {
+        $binary = $this->goBinaryName();
+
+        return 'https://github.com/larashed/agent-go/releases/latest/download/' . $binary;
     }
 
     /**
@@ -178,5 +208,13 @@ class AgentConfig
     public function getIgnoredEndpoints()
     {
         return config('larashed.ignored_endpoints', []);
+    }
+
+    /**
+     * @return string
+     */
+    protected function goBinaryName()
+    {
+        return 'agent_linux_amd64';
     }
 }
