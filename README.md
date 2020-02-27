@@ -27,6 +27,8 @@ We support all Laravel versions from 5.2.x
  5.8.x.   | 5.8.x
  6.x      | 6.x
 
+Agent currently supports only Linux environments. macOS and Windows are coming soon.
+
 ## Installation for Laravel 6.x
 
 Using the `composer require` command:
@@ -65,6 +67,15 @@ LARASHED_IGNORED_ENVS=env1,env2
 By default requests are tracked with your application's user's Id and name. If you'd like to disable it, use:
 ```
 LARASHED_COLLECT_USER_DATA=false
+```
+
+----
+In some cases you may need to configure the agent to use a socket path not relative to the project's storage directory.
+If you're running Linux on WSL (Windows Subsystem for Linux), you cannot make use of unix domain sockets located in `/mnt`.
+
+To change the directory of the domain socket use:
+```
+LARASHED_SOCKET_DIR=/absolute/dir/to/socket
 ```
 
 ### Running the agent
