@@ -38,16 +38,19 @@ class GoAgent
     /**
      * Run `agent-go daemon ...`
      *
+     * @param $socket
      * @param $logLevel
      */
-    public function run($logLevel)
+    public function run($socket = null, $logLevel = null)
     {
         $command = 'daemon';
+
+        $socket = (!empty($socket) ? $socket : $this->config->getSocketPath());
 
         $arguments = [
             $this->config->getGoAgentPath(),
             $command,
-            '--socket=' . $this->config->getSocketPath(),
+            '--socket=' . $socket,
             '--env=' . $this->config->getEnvironment(),
             '--app-id=' . $this->config->getApplicationId(),
             '--app-key=' . $this->config->getApplicationKey(),
@@ -56,7 +59,6 @@ class GoAgent
         ];
 
         $process = new Process($arguments, null, null, null, null);
-
         try {
             $process->run(function ($type, $buffer) {
                 if (Process::ERR === $type) {
@@ -66,7 +68,7 @@ class GoAgent
                 }
             });
         } catch (\Exception $exception) {
-            $this->print("Agent quit - " . $exception->getMessage());
+            $this->print("Agent quit:" . $exception->getMessage());
         }
 
         $this->print($process->getErrorOutput());
@@ -82,7 +84,8 @@ class GoAgent
             return;
         }
 
-        if (!$this->download($this->getLatestVersionTag())) {
+        $version = $this->getLatestVersionTag();
+        if (!$this->download($version)) {
             $this->print("Failed to download the latest agent.");
 
             return;
@@ -111,7 +114,8 @@ class GoAgent
             return;
         }
 
-        if (!$this->download($this->getLatestVersionTag())) {
+        $version = $this->getLatestVersionTag();
+        if (!$this->download($version)) {
             $this->print("Failed to download the latest agent.");
 
             return;
@@ -141,6 +145,10 @@ class GoAgent
     public function hasUpdate()
     {
         $latestVersion = $this->getLatestVersionTag();
+        if (empty($latestVersion)) {
+            return false;
+        }
+
         $installedVersion = $this->getInstalledAgentVersion();
 
         return $latestVersion !== $installedVersion;
@@ -195,6 +203,10 @@ class GoAgent
     protected function download($version)
     {
         $url = $this->config->getGoAgentDownloadUrl($version);
+        if (true) {
+            $url = $this->config->getGoAgentLatestDownloadUrl();
+        }
+
         if (!copy($url, $this->config->getGoAgentPath())) {
             return false;
         }
