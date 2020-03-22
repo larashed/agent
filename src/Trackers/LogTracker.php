@@ -2,6 +2,7 @@
 
 namespace Larashed\Agent\Trackers;
 
+use Carbon\Carbon;
 use Illuminate\Contracts\Events\Dispatcher as DispatcherInterface;
 
 /**
@@ -78,7 +79,7 @@ class LogTracker implements TrackerInterface
     {
         return function ($level, $message, $context) {
             $this->logs[] = [
-                'created_at' => now()->format('c'),
+                'created_at' => Carbon::now()->format('c'),
                 'order'      => count($this->logs) + 1,
                 'level'      => $this->mapLoggingLevel($level),
                 'message'    => $message,
@@ -94,7 +95,7 @@ class LogTracker implements TrackerInterface
     {
         return function ($event) {
             $this->logs[] = [
-                'created_at' => now()->format('c'),
+                'created_at' => Carbon::now()->format('c'),
                 'order'      => count($this->logs) + 1,
                 'level'      => $this->mapLoggingLevel($event->level),
                 'message'    => $event->message,
