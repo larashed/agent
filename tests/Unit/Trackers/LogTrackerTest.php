@@ -16,7 +16,7 @@ class LogTrackerTest extends TestCase
 {
     protected $eventName = 'Illuminate\Log\Events\MessageLogged';
 
-    public function setUp(): void
+    public function setUp()
     {
         parent::setUp();
     }
