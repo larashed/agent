@@ -15,6 +15,7 @@ use Larashed\Agent\Trackers\Database\QueryExcluder;
 use Larashed\Agent\Trackers\Database\QueryExcluderConfig;
 use Larashed\Agent\Trackers\DatabaseQueryTracker;
 use Larashed\Agent\Trackers\HttpRequestTracker;
+use Larashed\Agent\Trackers\LogTracker;
 use Larashed\Agent\Trackers\QueueJobTracker;
 use Larashed\Agent\Trackers\WebhookRequestTracker;
 use Larashed\Agent\Transport\DomainSocketTransport;
@@ -169,6 +170,10 @@ class AgentServiceProvider extends ServiceProvider
             $queryExcluder = new QueryExcluder(QueryExcluderConfig::fromConfig());
 
             $agent = new Agent($app[TransportInterface::class]);
+            if (config('larashed.logging_enabled')) {
+                $agent->addTracker('logs', new LogTracker($app['events']));
+            }
+
             $agent->addTracker('queries', new DatabaseQueryTracker($app[Measurements::class], $queryExcluder));
             $agent->addTracker('job', new QueueJobTracker($agent, $app[Measurements::class]));
             $agent->addTracker('request', new HttpRequestTracker($app['events'], $app[Measurements::class]));
