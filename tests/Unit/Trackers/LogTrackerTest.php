@@ -26,7 +26,7 @@ class LogTrackerTest extends TestCase
         $tracker = new LogTracker(app(Dispatcher::class));
         $tracker->bind();
 
-        event($this->getMessageLoggedEvent());
+        event('illuminate.log', ['debug', 'something.happened', [1, 2, 3]]);
 
         $log = $tracker->gather();
 
@@ -42,21 +42,12 @@ class LogTrackerTest extends TestCase
         $tracker = new LogTracker(app(Dispatcher::class));
         $tracker->bind();
 
-        event($this->getMessageLoggedEvent());
+        event('illuminate.log', ['debug', 'something.happened', [1, 2, 3]]);
 
         $this->assertNotEmpty($tracker->gather());
 
         $tracker->cleanup();
 
         $this->assertEmpty($tracker->gather());
-    }
-
-    protected function getMessageLoggedEvent()
-    {
-        if (class_exists($this->eventName)) {
-            $event = new $this->eventName('debug', 'something.happened', [1, 2, 3]);
-        }
-
-        return $event;
     }
 }
