@@ -163,10 +163,6 @@ class Command
 
     public function toArray()
     {
-        if (is_null($this->name)) {
-            return [];
-        }
-
         $command = [
             'name'         => $this->name,
             'arguments'    => $this->arguments,
