@@ -40,6 +40,13 @@ class ArtisanCommandTracker implements TrackerInterface
     protected $command;
 
     /**
+     * @var array
+     */
+    protected $ignoredCommands = [
+        'queue:work'
+    ];
+
+    /**
      * HttpRequestTracker constructor.
      *
      * @param DispatcherInterface $events
@@ -50,7 +57,6 @@ class ArtisanCommandTracker implements TrackerInterface
         $this->agent = $agent;
         $this->events = $events;
         $this->measurements = $measurements;
-        $this->command = new Command();
     }
 
     /**
@@ -72,6 +78,14 @@ class ArtisanCommandTracker implements TrackerInterface
      */
     public function gather()
     {
+        if (is_null($this->command)) {
+            return null;
+        }
+
+        if (in_array($this->command->getName(), $this->ignoredCommands)) {
+            return null;
+        }
+
         return $this->command->toArray();
     }
 
@@ -80,7 +94,7 @@ class ArtisanCommandTracker implements TrackerInterface
      */
     public function cleanup()
     {
-        $this->command = new Command();
+        $this->command = null;
     }
 
     /**
@@ -91,6 +105,7 @@ class ArtisanCommandTracker implements TrackerInterface
         return function (CommandStarting $event) {
             $startedAt = $this->measurements->microtime();
 
+            $this->command = new Command();
             $this->command->setInput($event->input);
             $this->command->setStartedAt($startedAt);
             $this->command->setCreatedAt(
@@ -121,6 +136,10 @@ class ArtisanCommandTracker implements TrackerInterface
     protected function onCommandFailedCallback()
     {
         return function (CaughtException $exceptionEvent) {
+            if (is_null($this->command)) {
+                return;
+            }
+
             $input = $this->command->getInput();
 
             $this->command->setArguments($this->getArguments($input));
