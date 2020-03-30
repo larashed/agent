@@ -4,6 +4,7 @@ namespace Larashed\Agent;
 
 use Illuminate\Contracts\Http\Kernel as HttpKernel;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Contracts\Debug\ExceptionHandler as ExceptionHandlerContract;
 use Larashed\Agent\Api\LarashedApi;
 use Larashed\Agent\Console\Commands\AgentCommand;
 use Larashed\Agent\Console\Commands\AgentQuitCommand;
@@ -15,11 +16,13 @@ use Larashed\Agent\Trackers\Database\QueryExcluder;
 use Larashed\Agent\Trackers\Database\QueryExcluderConfig;
 use Larashed\Agent\Trackers\DatabaseQueryTracker;
 use Larashed\Agent\Trackers\HttpRequestTracker;
+use Larashed\Agent\Trackers\ArtisanCommandTracker;
 use Larashed\Agent\Trackers\LogTracker;
 use Larashed\Agent\Trackers\QueueJobTracker;
 use Larashed\Agent\Trackers\WebhookRequestTracker;
 use Larashed\Agent\Transport\DomainSocketTransport;
 use Larashed\Agent\Transport\TransportInterface;
+
 
 class AgentServiceProvider extends ServiceProvider
 {
@@ -63,6 +66,7 @@ class AgentServiceProvider extends ServiceProvider
         $this->app->singleton(RequestTrackerMiddleware::class);
         $this->app->singleton(Agent::class, $this->getAgentInstance());
 
+        $this->replaceExceptionHandler();
         $this->loadMiddlewares();
         $this->loadRoutes();
     }
@@ -179,7 +183,28 @@ class AgentServiceProvider extends ServiceProvider
             $agent->addTracker('request', new HttpRequestTracker($app['events'], $app[Measurements::class]));
             $agent->addTracker('webhook', new WebhookRequestTracker($app['events'], $app[Measurements::class]));
 
+            if (app()->runningInConsole()) {
+                $agent->addTracker('command', new ArtisanCommandTracker($agent, $app['events'], $app[Measurements::class]));
+            }
+
             return $agent;
         };
+    }
+
+    /**
+     * Replaces App\Exceptions\Handler with an extended class
+     */
+    protected function replaceExceptionHandler()
+    {
+        if (!app()->runningInConsole()) {
+            return;
+        }
+
+        if (class_exists('App\Exceptions\Handler')) {
+            app()->singleton(
+                ExceptionHandlerContract::class,
+                'Larashed\Agent\Errors\ExceptionHandler'
+            );
+        }
     }
 }
