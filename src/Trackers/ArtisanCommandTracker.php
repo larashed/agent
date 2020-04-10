@@ -121,6 +121,10 @@ class ArtisanCommandTracker implements TrackerInterface
     protected function onCommandFinishingCallback()
     {
         return function (CommandFinished $event) {
+            if (is_null($this->command)) {
+                return;
+            }
+
             $this->command->setArguments($this->getArguments($event->input));
             $this->command->setOptions($this->getOptions($event->input));
             $this->command->setProcessedIn($this->measurements->microtime());
