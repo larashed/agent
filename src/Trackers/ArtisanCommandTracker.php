@@ -177,15 +177,22 @@ class ArtisanCommandTracker implements TrackerInterface
      */
     protected function getOptions(InputInterface $input)
     {
+        $options = [];
         $defaultOptions = $this->getDefaultCommandOptions();
-        $options = $input->getOptions();
+        $commandOptions = $input->getOptions();
 
-        $difference = array_merge(
-            array_diff($options, $defaultOptions),
-            array_diff($defaultOptions, $options)
-        );
+        foreach ($commandOptions as $key => $value) {
+            if (!array_key_exists($key, $defaultOptions)) {
+                $options[$key] = $value;
+                continue;
+            }
 
-        return $difference;
+            if ($defaultOptions[$key] != $commandOptions[$key]) {
+                $options[$key] = $value;
+            }
+        }
+
+        return $options;
     }
 
     /**
