@@ -120,15 +120,13 @@ class AgentServiceProvider extends ServiceProvider
     protected function getTransportInstance()
     {
         return function ($app) {
-            $transport = config('larashed.transport.default');
+            $transport = config('larashed.transport.default', 'socket');
             switch ($transport) {
                 case 'socket':
                     return new DomainSocketTransport(
                         $app[SocketClient::class]
                     );
             }
-
-            throw new \InvalidArgumentException('Invalid Larashed configuration. Unknown transport: ' . $transport);
         };
     }
 
