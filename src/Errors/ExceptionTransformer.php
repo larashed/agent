@@ -2,9 +2,8 @@
 
 namespace Larashed\Agent\Errors;
 
-use Exception;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
+use Throwable;
 
 /**
  * Class ExceptionTransformer
@@ -14,16 +13,16 @@ use Illuminate\Support\Str;
 class ExceptionTransformer
 {
     /**
-     * @var \Exception
+     * @var Throwable
      */
     protected $exception;
 
     /**
      * ExceptionTransformer constructor.
      *
-     * @param \Exception $exception
+     * @param Throwable $exception
      */
-    public function __construct(Exception $exception)
+    public function __construct(Throwable $exception)
     {
         $this->exception = $exception;
     }

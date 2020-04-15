@@ -2,8 +2,8 @@
 
 namespace Larashed\Agent\Trackers\Traits;
 
-use Exception;
 use Larashed\Agent\Errors\ExceptionTransformer;
+use Throwable;
 
 /**
  * Trait ExceptionTransformerTrait
@@ -18,11 +18,11 @@ trait ExceptionTransformerTrait
     protected $exception;
 
     /**
-     * @param Exception $exception
+     * @param Throwable $exception
      *
      * @return $this
      */
-    public function setExceptionData(Exception $exception)
+    public function setExceptionData(Throwable $exception)
     {
         $transformer = new ExceptionTransformer($exception);
         $this->exception = $transformer->toArray();

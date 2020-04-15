@@ -8,6 +8,7 @@ use Larashed\Agent\System\Measurements;
 use Larashed\Agent\Trackers\Traits\ExceptionTransformerTrait;
 use Larashed\Agent\Trackers\Traits\MemoryCalculationTrait;
 use Larashed\Agent\Trackers\Traits\TimeCalculationTrait;
+use Throwable;
 
 /**
  * Class Job
@@ -80,11 +81,11 @@ class Job
 
     /**
      * @param                $connection
-     * @param Exception|null $exception
+     * @param Throwable|null $exception
      *
-     * @throws Exception
+     * @throws Throwable
      */
-    public function finalize($connection, Exception $exception = null)
+    public function finalize($connection, Throwable $exception = null)
     {
         $this->connection = $connection;
         $this->queue = $this->job->getQueue();

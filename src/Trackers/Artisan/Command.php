@@ -6,6 +6,7 @@ use Exception;
 use Larashed\Agent\Errors\ExceptionTransformer;
 use Larashed\Agent\Trackers\Traits\TimeCalculationTrait;
 use Symfony\Component\Console\Input\InputInterface;
+use Throwable;
 
 class Command
 {
@@ -122,7 +123,7 @@ class Command
     }
 
     /**
-     * @return Exception
+     * @return Throwable
      */
     public function getException()
     {
@@ -130,11 +131,11 @@ class Command
     }
 
     /**
-     * @param Exception $exception
+     * @param Throwable $exception
      *
      * @return Command
      */
-    public function setException(Exception $exception)
+    public function setException(Throwable $exception)
     {
         $this->exception = $exception;
 
