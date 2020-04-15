@@ -34,7 +34,7 @@ Agent currently supports only Linux environments. macOS and Windows are coming s
 Using the `composer require` command:
 
 ```
-composer require larashed/agent
+composer require larashed/agent:6.x.*
 ```
 
 ## Installation for Laravel 5.x
