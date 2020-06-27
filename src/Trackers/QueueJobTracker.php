@@ -117,7 +117,7 @@ class QueueJobTracker implements TrackerInterface
      */
     protected function onJobFailureCallback()
     {
-        return function (JobFailed $event) {
+        return function (JobExceptionOccurred $event) {
             if (!is_null($this->job)) {
                 $this->job->finalize($event->connectionName, $event->exception);
                 $this->agent->stop();
