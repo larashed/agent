@@ -14,7 +14,7 @@ return [
     | is disabled. Separated by commas.
     |
     */
-    'ignored_environments' => env('LARASHED_IGNORED_ENVS', ''),
+    'ignored_environments' => env('LARASHED_IGNORED_ENVS', 'testing'),
 
     /*
     |--------------------------------------------------------------------------
