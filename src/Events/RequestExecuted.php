@@ -18,15 +18,19 @@ class RequestExecuted
 
     public $response;
 
+    public $requestStartTime;
+
     /**
      * RequestExecuted constructor.
      *
      * @param Request $request
      * @param         $response
+     * @param         $requestStartTime
      */
-    public function __construct(Request $request, $response)
+    public function __construct(Request $request, $response, $requestStartTime)
     {
         $this->request = $request;
         $this->response = $response;
+        $this->requestStartTime = $requestStartTime;
     }
 }
