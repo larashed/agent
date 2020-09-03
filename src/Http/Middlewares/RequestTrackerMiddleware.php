@@ -6,6 +6,7 @@ use Illuminate\Support\Str;
 use Larashed\Agent\Agent;
 use Larashed\Agent\AgentConfig;
 use Larashed\Agent\Events\RequestExecuted;
+use Larashed\Agent\System\Measurements;
 
 /**
  * Class RequestTrackerMiddleware
@@ -25,15 +26,21 @@ class RequestTrackerMiddleware
     protected $config;
 
     /**
+     * @var Measurements
+     */
+    protected $measurements;
+
+    /**
      * Terminating constructor.
      *
      * @param Agent       $agent
      * @param AgentConfig $config
      */
-    public function __construct(Agent $agent, AgentConfig $config)
+    public function __construct(Agent $agent, AgentConfig $config, Measurements $measurements)
     {
         $this->agent = $agent;
         $this->config = $config;
+        $this->measurements = $measurements;
     }
 
     /**
@@ -44,11 +51,17 @@ class RequestTrackerMiddleware
      */
     public function handle($request, \Closure $next)
     {
+        $requestStartTime = $this->measurements->microtime();
+
+        if (defined('LARAVEL_START')) {
+            $requestStartTime = LARAVEL_START;
+        }
+
         $response = $next($request);
 
         $requestIgnored = Str::contains($request->getUri(), $this->config->getIgnoredEndpoints());
         if (!$requestIgnored) {
-            event(new RequestExecuted($request, $response));
+            event(new RequestExecuted($request, $response, $requestStartTime));
         }
 
         return $response;
