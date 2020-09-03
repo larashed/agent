@@ -51,7 +51,7 @@ class HttpRequestTrackerTest extends TestCase
     protected function getRequestExecutedEvent()
     {
         $request = $this->getRequestMock($this->getRouteMock(), $this->getUserMock());
-        $mock = new RequestExecuted($request, $this->getResponseMock());
+        $mock = new RequestExecuted($request, $this->getResponseMock(), 0);
 
         return $mock;
     }
