@@ -7,12 +7,13 @@ use Larashed\Agent\Agent;
 use Larashed\Agent\AgentConfig;
 use Larashed\Agent\Events\RequestExecuted;
 use Larashed\Agent\Http\Middlewares\RequestTrackerMiddleware;
+use Larashed\Agent\Tests\Traits\MeasurementsMock;
 use Larashed\Agent\Tests\Traits\RequestMock;
 use Orchestra\Testbench\TestCase;
 
 class RequestTrackerMiddlewareTest extends TestCase
 {
-    use RequestMock;
+    use RequestMock, MeasurementsMock;
 
     public function testHandleTriggersRequestExecutedEvent()
     {
@@ -35,7 +36,7 @@ class RequestTrackerMiddlewareTest extends TestCase
             return $this->getResponseMock();
         };
 
-        $middleware = new RequestTrackerMiddleware($agent, $config);
+        $middleware = new RequestTrackerMiddleware($agent, $config, $this->getMeasurementsMock());
 
         $this->assertFalse($called);
 
@@ -65,7 +66,7 @@ class RequestTrackerMiddlewareTest extends TestCase
             return $this->getResponseMock();
         };
 
-        $middleware = new RequestTrackerMiddleware($agent, $config);
+        $middleware = new RequestTrackerMiddleware($agent, $config, $this->getMeasurementsMock());
 
         $this->assertFalse($called);
 
@@ -84,7 +85,7 @@ class RequestTrackerMiddlewareTest extends TestCase
         $config = \Mockery::mock(AgentConfig::class, [
             'getIgnoredEndpoints' => null
         ]);
-        $middleware = new RequestTrackerMiddleware($agent, $config);
+        $middleware = new RequestTrackerMiddleware($agent, $config, $this->getMeasurementsMock());
 
         $this->assertFalse($called);
 

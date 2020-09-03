@@ -85,7 +85,7 @@ class HttpRequestTracker implements TrackerInterface
     protected function onRequestProcessedCallback()
     {
         return function (RequestExecuted $event) {
-            $this->request = new Request($this->measurements, $event->request);
+            $this->request = new Request($this->measurements, $event->request, $event->requestStartTime);
             $this->response = new Response($event->response);
         };
     }
