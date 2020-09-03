@@ -40,7 +40,7 @@ class RequestTest extends TestCase
 
     public function testRequestToArrayReturnsWithKeys()
     {
-        $request = new Request($this->measurements, $this->getBaseRequestMock());
+        $request = new Request($this->measurements, $this->getBaseRequestMock(), 0);
         $result = $request->toArray();
 
         $this->assertArrayHasKey('created_at', $result);
@@ -65,7 +65,7 @@ class RequestTest extends TestCase
 
     public function testRequestToArrayReturnsWithValues()
     {
-        $request = new Request($this->measurements, $this->getBaseRequestMock());
+        $request = new Request($this->measurements, $this->getBaseRequestMock(), 0);
         $result = $request->toArray();
 
         $this->assertEquals($this->time, $result['created_at']);

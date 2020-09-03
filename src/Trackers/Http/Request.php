@@ -23,15 +23,22 @@ class Request
     protected $measurements;
 
     /**
+     * @var float
+     */
+    protected $requestStartTime;
+
+    /**
      * Request constructor.
      *
      * @param Measurements $measurements
      * @param BaseRequest  $request
+     * @param float        $requestStartTime
      */
-    public function __construct(Measurements $measurements, BaseRequest $request)
+    public function __construct(Measurements $measurements, BaseRequest $request, $requestStartTime)
     {
         $this->measurements = $measurements;
         $this->request = $request;
+        $this->requestStartTime = $requestStartTime;
     }
 
     /**
@@ -40,8 +47,8 @@ class Request
     public function toArray()
     {
         $data = [
-            'created_at'   => $this->measurements->time(LARAVEL_START),
-            'processed_in' => $this->measurements->microtimeDiff(LARAVEL_START, $this->measurements->microtime()),
+            'created_at'   => $this->measurements->time($this->requestStartTime),
+            'processed_in' => $this->measurements->microtimeDiff($this->requestStartTime, $this->measurements->microtime()),
             'url'          => $this->request->getUri(),
             'method'       => $this->request->getMethod(),
             'route'        => $this->getRouteData(),
