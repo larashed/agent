@@ -27,15 +27,24 @@ We support all Laravel versions from 5.2.x
  5.8.x.   | 5.8.x
  6.x      | 6.x
  7.x      | 7.x
+ 8.x      | 8.x
 
 Agent currently supports only Linux environments. macOS and Windows are coming soon.
+
+## Installation for Laravel 8.x
+
+Using the `composer require` command:
+
+```
+composer require larashed/agent
+```
 
 ## Installation for Laravel 7.x
 
 Using the `composer require` command:
 
 ```
-composer require larashed/agent
+composer require larashed/agent:7.*
 ```
 
 ## Installation for Laravel 6.x
