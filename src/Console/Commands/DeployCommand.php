@@ -140,7 +140,7 @@ class DeployCommand extends Command
             'commit_remote'     => trim($this->exec('git config --get remote.origin.url')),
             'commit_message'    => Arr::get($data, 'message'),
             'commit_author'     => Arr::get($data, 'author'),
-            'commit_created_at' => $this->measurements->time(Arr::get($data, 'commit_created_at')),
+            'commit_created_at' => $this->measurements->time(Arr::get($data, 'created_at')),
             'created_at'        => $this->measurements->time()
         ];
     }
