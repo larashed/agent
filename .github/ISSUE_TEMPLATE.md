@@ -1,15 +1,14 @@
 <!--
-Please use this issue tracker only for reporting Larashed Agent bugs.
+Please use this issue tracker to report bugs within the scope of Larashed Agent.
 
-If you need support, please write us at:
+If you need support, please get in touch through:
 
 - hello@larashed.com
-- Live chat at https://app.larashed.com
+- Live chat on https://app.larashed.com
 -->
 
 - Laravel Version: #.#.#
-- PHP Version:
-- Database Driver & Version:
+- PHP Version: #.#.#
 
 ### Description:
 
