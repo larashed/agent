@@ -29,7 +29,7 @@ We support all Laravel versions from 5.2.x
  7.x      | 7.x
  8.x      | 8.x
 
-Agent currently supports only Linux environments. macOS and Windows are coming soon.
+Only Linux based environments are supported. macOS and Windows are coming.
 
 ## Installation for Laravel 8.x
 
@@ -138,8 +138,5 @@ When you run `php artisan larashed:agent`, it downloads our [Golang agent](https
 
 ## We'd love to hear your feedback!
 
-If your have any questions, feature requests, issues or just want to say hi, don't hesitate to get in touch via <a href="mailto:hello@larashed.com">hello@larashed.com</a>.
-For issues regarding this package, please [submit a new issue](https://github.com/larashed/agent/issues/new) in this repository. 
-
-For general purpose questions and feedback that you’d like our community to also see, you can [create an issue](https://github.com/larashed/feedback/issues/new) in 
-our public [`larashed/feedback`](https://github.com/larashed/feedback/issues) Github repository.
+If you have any questions, feature requests, issues or just want to say hi, don't hesitate to get in touch via <a href="mailto:hello@larashed.com">hello@larashed.com</a>.
+For issues regarding this package, please [submit a new issue](https://github.com/larashed/agent/issues/new) in this repository.
