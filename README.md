@@ -110,6 +110,7 @@ but you can use any software you prefer to keep it running.
 command=php /home/forge/app.com/artisan larashed:agent
 autostart=true
 autorestart=true
+redirect_stderr=true
 stdout_logfile=/home/forge/app.com/larashed-agent.log
 ```
 
