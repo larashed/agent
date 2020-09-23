@@ -7,9 +7,15 @@ This package hooks into your Laravel application and sends monitoring data to [l
 
 ---
 * [Version Compatibility](#version-compatibility)
-* [Installation](#user-content-installation-for-laravel-6x)
-* [Usage and Configuration](#usage-and-configuration)
-* [Golang agent](#golang-server-agent)
+* [Installation](#installation-for-laravel-8x)
+* [Configuration](#configuration)
+* [Running the agent](#running-the-agent)
+    * [Artisan command](#artisan-command)
+    * [Supervisord](#supervisord)
+    * [Laravel Forge](#laravel-forge)
+    * [Docker](#docker)
+* [Tracking deployments](#tracking-deployments)
+* [Golang agent](#golang-agent)
 * [Release history](https://github.com/larashed/agent/releases)
 
 ## Version Compatibility
@@ -69,13 +75,13 @@ For Laravel 5.4 and below, add service provider
 Larashed\Agent\AgentServiceProvider::class
 ```
 
-## Usage and configuration
+## Configuration
 
 Edit your `.env` file and add the following:
 ```bash
 LARASHED_APP_ID=<Your App ID>
 LARASHED_APP_KEY=<Your App key>
-```
+``` 
 
 If you'd like to disable monitoring for certain environments use:
 ```bash
@@ -98,10 +104,12 @@ LARASHED_SOCKET_DIR=/absolute/dir/to/socket
 
 ### Running the agent
 
+#### Artisan command
 ```
 php artisan larashed:agent
 ```
 
+#### Supervisord
 We recommend using [Supervisord](http://supervisord.org/installing.html) to keep the agent daemon alive,
 but you can use any software you prefer to keep it running.
 
@@ -114,8 +122,15 @@ redirect_stderr=true
 stdout_logfile=/home/forge/app.com/larashed-agent.log
 ```
 
-### Tracking deployments
+#### Laravel Forge
+For [Laravel Forge](https://forge.laravel.com/) users, go to your Server details page and setup a new Daemon.
 
+![Forge setup](https://raw.githubusercontent.com/larashed/agent/master/.github/images/forge.png)
+
+#### Docker
+Under development.
+
+### Tracking deployments
 ```
 php artisan larashed:deploy
 ```
