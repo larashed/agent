@@ -5,11 +5,11 @@ namespace Larashed\Agent\Transport;
 use Larashed\Agent\Ipc\SocketClient;
 
 /**
- * Class DomainSocketTransport
+ * Class SocketTransport
  *
  * @package Larashed\Agent\Transport
  */
-class DomainSocketTransport implements TransportInterface
+class SocketTransport implements TransportInterface
 {
     /**
      * @var SocketClient
@@ -17,7 +17,7 @@ class DomainSocketTransport implements TransportInterface
     protected $client;
 
     /**
-     * DomainSocketTransport constructor.
+     * SocketTransport constructor.
      *
      * @param SocketClient $client
      */
