@@ -21,6 +21,11 @@ class GoAgent
     protected $config;
 
     /**
+     * @var SocketClient
+     */
+    protected $client;
+
+    /**
      * @var string
      */
     protected $latestVersion;
@@ -29,29 +34,34 @@ class GoAgent
      * GoAgent constructor.
      *
      * @param AgentConfig $config
+     * @param SocketClient $client
      */
-    public function __construct(AgentConfig $config)
+    public function __construct(AgentConfig $config, SocketClient $client)
     {
         $this->config = $config;
+        $this->client = $client;
     }
 
     /**
      * Run `agent-go daemon ...`
      *
-     * @param $socket
+     * @param string $socketType
+     * @param string $socketAddress
      * @param $logLevel
      */
-    public function run($socket = null, $logLevel = null)
+    public function run($socketType = null, $socketAddress = null, $logLevel = null)
     {
         $command = 'daemon';
 
-        $socket = (!empty($socket) ? $socket : $this->config->getSocketPath());
+        $socketType = !empty($socketType) ? $socketType : $this->client->getSocketType();
+        $socketAddress = !empty($socketAddress) ? $socketAddress : $this->client->getSocketAddress();
 
         $arguments = [
             $this->config->getGoAgentPath(),
             $command,
-            '--socket=' . $socket,
-            '--env=' . $this->config->getEnvironment(),
+            '--socket-type=' . $socketType,
+            '--socket-address=' . $socketAddress,
+            '--app-env=' . $this->config->getEnvironment(),
             '--app-id=' . $this->config->getApplicationId(),
             '--app-key=' . $this->config->getApplicationKey(),
             '--api-url=' . $this->config->getBaseApiUrl(),
