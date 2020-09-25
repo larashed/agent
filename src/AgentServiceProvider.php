@@ -8,6 +8,7 @@ use Larashed\Agent\Api\LarashedApi;
 use Larashed\Agent\Console\Commands\AgentCommand;
 use Larashed\Agent\Console\Commands\AgentQuitCommand;
 use Larashed\Agent\Console\Commands\DeployCommand;
+use Larashed\Agent\Console\GoAgent;
 use Larashed\Agent\Http\Middlewares\RequestTrackerMiddleware;
 use Larashed\Agent\Ipc\SocketClient;
 use Larashed\Agent\System\Measurements;
@@ -18,7 +19,7 @@ use Larashed\Agent\Trackers\HttpRequestTracker;
 use Larashed\Agent\Trackers\LogTracker;
 use Larashed\Agent\Trackers\QueueJobTracker;
 use Larashed\Agent\Trackers\WebhookRequestTracker;
-use Larashed\Agent\Transport\DomainSocketTransport;
+use Larashed\Agent\Transport\SocketTransport;
 use Larashed\Agent\Transport\TransportInterface;
 
 class AgentServiceProvider extends ServiceProvider
@@ -59,6 +60,7 @@ class AgentServiceProvider extends ServiceProvider
         $this->app->singleton(Measurements::class);
         $this->app->singleton(SocketClient::class, $this->getSocketClientInstance());
         $this->app->singleton(TransportInterface::class, $this->getTransportInstance());
+        $this->app->singleton(LarashedApi::class, $this->getLarashedApiInstance());
         $this->app->singleton(LarashedApi::class, $this->getLarashedApiInstance());
         $this->app->singleton(RequestTrackerMiddleware::class);
         $this->app->singleton(Agent::class, $this->getAgentInstance());
@@ -101,6 +103,20 @@ class AgentServiceProvider extends ServiceProvider
     }
 
     /**
+     * Buils GoAgent
+     *
+     * @return \Closure
+     */
+    protected function getGoAgentInstance()
+    {
+        return function ($app) {
+            return new GoAgent(
+                $app[AgentConfig::class], $app[SocketClient::class]
+            );
+        };
+    }
+
+    /**
      * Builds Larashed API client
      *
      * @return \Closure
@@ -120,13 +136,9 @@ class AgentServiceProvider extends ServiceProvider
     protected function getTransportInstance()
     {
         return function ($app) {
-            $transport = config('larashed.transport.default', 'socket');
-            switch ($transport) {
-                case 'socket':
-                    return new DomainSocketTransport(
-                        $app[SocketClient::class]
-                    );
-            }
+            return new SocketTransport(
+                $app[SocketClient::class]
+            );
         };
     }
 
@@ -135,9 +147,19 @@ class AgentServiceProvider extends ServiceProvider
         return function ($app) {
             /** @var AgentConfig $config */
             $config = $app[AgentConfig::class];
-            $socketPath = $config->getSocketPath();
 
-            return new SocketClient($socketPath);
+            $transport = config('larashed.transport.default', SocketClient::UNIX);
+            $address = config('larashed.transport.engines.' . $transport . '.address');
+
+            if ($transport === SocketClient::UNIX) {
+                if ($address === '.') {
+                    $address = $config->getStorageDirectory() . AgentConfig::SOCKET_FILE;
+                } else {
+                    $address .= AgentConfig::SOCKET_FILE;
+                }
+            }
+
+            return new SocketClient($transport, $address);
         };
     }
 
@@ -149,8 +171,6 @@ class AgentServiceProvider extends ServiceProvider
                 config('larashed.application_key'),
                 config('app.env'),
                 config('larashed.directory'),
-                config('larashed.transport.engines.socket.file'),
-                config('larashed.transport.engines.socket.directory'),
                 config('larashed.url'),
                 config('larashed.verify-ssl')
             );
