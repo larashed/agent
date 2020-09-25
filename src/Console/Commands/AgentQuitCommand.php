@@ -4,7 +4,6 @@ namespace Larashed\Agent\Console\Commands;
 
 use Illuminate\Console\Command;
 use Larashed\Agent\Agent;
-use Larashed\Agent\AgentConfig;
 use Larashed\Agent\Console\GoAgent;
 
 /**
@@ -35,7 +34,7 @@ class AgentQuitCommand extends Command
             exit;
         }
 
-        $agent = new GoAgent(app(AgentConfig::class));
+        $agent = app(GoAgent::class);
         if ($agent->isInstalled()) {
             $agent->signalQuit();
         }
