@@ -6,7 +6,6 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Larashed\Agent\Agent;
-use Larashed\Agent\AgentConfig;
 use Larashed\Agent\Api\LarashedApi;
 use Larashed\Agent\Api\LarashedApiException;
 use Larashed\Agent\Console\GoAgent;
@@ -77,7 +76,7 @@ class DeployCommand extends Command
      */
     protected function signalAgentQuitForUpdate()
     {
-        $agent = new GoAgent(app(AgentConfig::class));
+        $agent = app(GoAgent::class);
         if ($agent->isInstalled() && $agent->hasUpdate()) {
             $agent->signalQuit();
         }

@@ -6,19 +6,61 @@ class SocketClient
 {
     const QUIT = 'quit';
 
+    const UNIX = 'unix';
+    const TCP  = 'tcp';
+
     /**
      * @var string
      */
-    protected $socketPath;
+    protected $type;
+
+    /**
+     * @var string
+     */
+    protected $address;
 
     /**
      * SocketClient constructor.
      *
-     * @param string $socketPath
+     * @param string $type
+     * @param string $address
      */
-    public function __construct($socketPath)
+    public function __construct($type, $address)
     {
-        $this->socketPath = $socketPath;
+        $this->type = $type;
+        $this->address = $address;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSocketType()
+    {
+        return $this->type;
+    }
+
+    /**
+     * @return bool
+     */
+    public function usesUnixSocket()
+    {
+        return $this->type === self::UNIX;
+    }
+
+    /**
+     * @return bool
+     */
+    public function usesTcpSocket()
+    {
+        return $this->type === self::TCP;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSocketAddress()
+    {
+        return $this->address;
     }
 
     /**
@@ -26,11 +68,13 @@ class SocketClient
      */
     public function send($message)
     {
+        if ($this->usesUnixSocket() && !file_exists($this->address)) {
+            return;
+        }
+
         try {
-            if (file_exists($this->socketPath)) {
-                $sock = stream_socket_client('unix://' . $this->socketPath, $errorNumber, $errorMessage);
-                fwrite($sock, $message);
-            }
+            $sock = stream_socket_client($this->type . '://' . $this->address, $errorNumber, $errorMessage);
+            fwrite($sock, $message);
         } catch (\Exception $e) {
             // ignore error
         }
