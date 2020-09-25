@@ -46,7 +46,7 @@ return [
     | Directory in which Larashed will store it's data
     |
     */
-    'directory'            => 'app/larashed',
+    'directory'            => storage_path('app/larashed'),
 
     /*
     |--------------------------------------------------------------------------
@@ -57,14 +57,16 @@ return [
     |
     */
     'transport'            => [
-        'default' => 'socket',
+        'default' => env('LARASHED_TRANSPORT', 'unix'),
 
         'engines' => [
-            'socket' => [
+            'unix' => [
                 // filename for the unix socket within larashed.directory value
-                'file'      => 'larashed.sock',
-                'directory' => env('LARASHED_SOCKET_DIR', '.')
+                'address' => env('LARASHED_SOCKET_DIR', '.')
             ],
+            'tcp'  => [
+                'address' => env('LARASHED_TCP_ADDRESS', '127.0.0.1:33101'),
+            ]
         ]
     ],
     /*

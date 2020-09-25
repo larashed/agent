@@ -10,6 +10,7 @@ namespace Larashed\Agent;
 class AgentConfig
 {
     const API_VERSION = 'v1';
+    const SOCKET_FILE = 'larashed.sock';
 
     /**
      * @var string
@@ -39,7 +40,7 @@ class AgentConfig
     /**
      * @var string
      */
-    protected $socketDir;
+    protected $socketDirectory;
 
     /**
      * @var string
@@ -58,8 +59,6 @@ class AgentConfig
      * @param string $applicationKey
      * @param string $environment
      * @param string $storageDirectory
-     * @param string $socketFile
-     * @param string $socketDir
      * @param string $url
      * @param bool   $cert
      */
@@ -68,8 +67,6 @@ class AgentConfig
         $applicationKey,
         $environment,
         $storageDirectory,
-        $socketFile,
-        $socketDir,
         $url,
         $cert
     )
@@ -78,8 +75,6 @@ class AgentConfig
         $this->applicationKey = $applicationKey;
         $this->environment = $environment;
         $this->storageDirectory = $storageDirectory;
-        $this->socketFile = $socketFile;
-        $this->socketDir = $socketDir;
         $this->url = $url;
         $this->useCertificate = $cert;
     }
@@ -129,9 +124,7 @@ class AgentConfig
      */
     public function getStorageDirectory()
     {
-        $storageDirectory = storage_path(
-            rtrim($this->storageDirectory, '/') . '/'
-        );
+        $storageDirectory = rtrim($this->storageDirectory, '/') . '/';
 
         return $storageDirectory;
     }
@@ -150,22 +143,6 @@ class AgentConfig
     public function getGoAgentPath()
     {
         return $this->getGoAgentDirectory() . 'agent';
-    }
-
-    /**
-     * @return string
-     */
-    public function getSocketPath()
-    {
-        $dir = rtrim($this->socketDir, '/') . '/';
-
-        if ($this->socketDir === '.' || $this->socketDir === './') {
-            $dir = $this->getStorageDirectory();
-        }
-
-        $socket = $dir . trim($this->socketFile, '/');
-
-        return $socket;
     }
 
     /**
@@ -215,6 +192,10 @@ class AgentConfig
      */
     protected function goBinaryName()
     {
+        if (strtolower(PHP_OS) === 'darwin') {
+            return 'agent_darwin_amd64';
+        }
+
         return 'agent_linux_amd64';
     }
 }
