@@ -73,6 +73,10 @@ class Agent
             }
         }
 
+        if (empty($data)) {
+            return;
+        }
+
         $this->transport->push($data);
     }
 
