@@ -64,7 +64,6 @@ class AgentServiceProvider extends ServiceProvider
         $this->app->singleton(SocketClient::class, $this->getSocketClientInstance());
         $this->app->singleton(TransportInterface::class, $this->getTransportInstance());
         $this->app->singleton(LarashedApi::class, $this->getLarashedApiInstance());
-        $this->app->singleton(LarashedApi::class, $this->getLarashedApiInstance());
         $this->app->singleton(RequestTrackerMiddleware::class);
         $this->app->singleton(Agent::class, $this->getAgentInstance());
 
@@ -197,9 +196,9 @@ class AgentServiceProvider extends ServiceProvider
             }
 
             $agent->addTracker('queries', new DatabaseQueryTracker($app[Measurements::class], $queryExcluder));
-            $agent->addTracker('job', new QueueJobTracker($agent, $app[Measurements::class]));
             $agent->addTracker('request', new HttpRequestTracker($app['events'], $app[Measurements::class]));
             $agent->addTracker('webhook', new WebhookRequestTracker($app['events'], $app[Measurements::class]));
+            $agent->addTracker('job', new QueueJobTracker($agent, $app[Measurements::class]));
 
             if (app()->runningInConsole()) {
                 $agent->addTracker('command', new ArtisanCommandTracker($agent, $app['events'], $app[Measurements::class]));

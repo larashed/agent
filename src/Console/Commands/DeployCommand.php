@@ -10,7 +10,6 @@ use Larashed\Agent\Api\LarashedApi;
 use Larashed\Agent\Api\LarashedApiException;
 use Larashed\Agent\Console\GoAgent;
 use Larashed\Agent\System\Measurements;
-use Larashed\Agent\System\System;
 
 /**
  * Class DeployCommand
@@ -19,11 +18,6 @@ use Larashed\Agent\System\System;
  */
 class DeployCommand extends Command
 {
-    /**
-     * @var System
-     */
-    protected $system;
-
     /**
      * @var LarashedApi
      */
@@ -58,7 +52,6 @@ class DeployCommand extends Command
             exit;
         }
 
-        $this->system = app(System::class);
         $this->measurements = app(Measurements::class);
         $this->api = app(LarashedApi::class);
 
@@ -101,7 +94,7 @@ class DeployCommand extends Command
      */
     protected function exec($command, $multiline = false)
     {
-        $output = $this->system->exec($command . ' 2>&1');
+        $output = shell_exec($command . ' 2>&1');
 
         if ($multiline) {
             $output = explode("\n", $output);
