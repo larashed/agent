@@ -60,22 +60,13 @@ class Agent
      */
     public function stop()
     {
-        $data = [];
-        collect($this->trackers)->each(function (TrackerInterface $tracker, $name) use (&$data) {
-            $data[$name] = $tracker->gather();
-            $tracker->cleanup();
-        });
+        $data = $this->gatherCollectedData();
 
-        // remove empty keys
-        foreach ($data as $key => $value) {
-            if (empty($value)) {
-                unset($data[$key]);
-            }
-        }
-
-        if (empty($data)) {
+        if (is_null($data)) {
             return;
         }
+
+        $data['config'] = $this->environmentConfig();
 
         $this->transport->push($data);
     }
@@ -91,5 +82,46 @@ class Agent
             })->toArray();
 
         return !in_array(config('app.env'), $envs);
+    }
+
+    protected function gatherCollectedData()
+    {
+        $data = [];
+
+        collect($this->trackers)->each(function (TrackerInterface $tracker, $name) use (&$data) {
+            $data[$name] = $tracker->gather();
+            $tracker->cleanup();
+        });
+
+        // remove empty keys
+        foreach ($data as $key => $value) {
+            if (empty($value)) {
+                unset($data[$key]);
+            }
+        }
+
+        if (empty($data)) {
+            return null;
+        }
+
+        return $data;
+    }
+
+    protected function environmentConfig()
+    {
+        return [
+            'name'            => config('app.name'),
+            'env'             => config('app.env'),
+            'url'             => config('app.url'),
+            'drivers'         => [
+                'queue'    => config('queue.default'),
+                'database' => config('database.default'),
+                'cache'    => config('cache.default'),
+                'mail'     => config('mail.driver'),
+            ],
+            'laravel_version' => app()->version(),
+            'hostname'        => gethostname(),
+            'php_version'     => phpversion(),
+        ];
     }
 }

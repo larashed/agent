@@ -9,8 +9,6 @@ use Larashed\Agent\AgentConfig;
 use Larashed\Agent\Api\LarashedApi;
 use Larashed\Agent\Console\GoAgent;
 use Larashed\Agent\Ipc\SocketClient;
-use Larashed\Agent\Trackers\ApplicationEnvironmentTracker;
-use Larashed\Agent\Trackers\ServerInformationTracker;
 
 /**
  * Class AgentCommand
@@ -38,16 +36,6 @@ class AgentCommand extends Command
     protected $description = 'Runs the Larashed agent';
 
     /**
-     * @var ApplicationEnvironmentTracker
-     */
-    protected $environmentTracker;
-
-    /**
-     * @var ServerInformationTracker
-     */
-    protected $serverTracker;
-
-    /**
      * @var LarashedApi
      */
     protected $api;
@@ -59,37 +47,9 @@ class AgentCommand extends Command
     {
         $this->performChecks();
 
-        $this->environmentTracker = app(ApplicationEnvironmentTracker::class);
-        $this->serverTracker = app(ServerInformationTracker::class);
         $this->api = app(LarashedApi::class);
 
-        try {
-            $this->updateEnvironmentInformation();
-            $this->updateServerInformation();
-        } catch (\Exception $exception) {
-            $this->error("Agent start error: " . $exception->getMessage());
-            exit;
-        }
-
         $this->runAgent();
-    }
-
-    /**
-     * @throws \Larashed\Agent\Api\LarashedApiException
-     */
-    protected function updateEnvironmentInformation()
-    {
-        $data = $this->environmentTracker->gather();
-        $this->api->sendEnvironmentInformation($data);
-    }
-
-    /**
-     * @throws \Larashed\Agent\Api\LarashedApiException
-     */
-    protected function updateServerInformation()
-    {
-        $data = $this->serverTracker->gather();
-        $this->api->sendServerInformation($data);
     }
 
     protected function runAgent()
