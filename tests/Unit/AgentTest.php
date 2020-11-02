@@ -43,6 +43,9 @@ class AgentTest extends TestCase
     {
         $storage = \Mockery::mock(TransportInterface::class);
         $storage->shouldReceive('push')->andReturnUsing(function ($data) use (&$collectedData) {
+            $this->assertArrayHasKey('config', $data);
+            unset($data['config']);
+
             $expected = [
                 'first'  => ['tracker1'],
                 'second' => ['tracker2'],
