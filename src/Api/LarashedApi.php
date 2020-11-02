@@ -51,18 +51,6 @@ class LarashedApi
     }
 
     /**
-     * @param $data
-     *
-     * @return mixed
-     *
-     * @throws LarashedApiException
-     */
-    public function sendServerInformation($data)
-    {
-        return $this->makePostRequest('agent/server/information', $data);
-    }
-
-    /**
      * @param       $endpoint
      * @param mixed $body
      *
@@ -74,7 +62,9 @@ class LarashedApi
     {
         $uri = rtrim($this->config->getBaseApiUrl(), '/') . '/' . AgentConfig::API_VERSION . '/' . $endpoint;
         $authKey = $this->config->getApplicationId() . ":" . $this->config->getApplicationKey();
-        $headers = ['Larashed-Environment: ' . $this->config->getEnvironment()];
+
+        $headers = [];
+        $headers[] = 'User-Agent: Larashed/PHPAgent';
         $headers[] = 'Content-Type: application/json';
         $headers[] = 'Accept: application/json';
 
