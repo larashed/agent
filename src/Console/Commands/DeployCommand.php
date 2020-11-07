@@ -18,6 +18,8 @@ use Larashed\Agent\System\Measurements;
  */
 class DeployCommand extends Command
 {
+    const INFORMATION_FILE = '.larashed.json';
+
     /**
      * @var LarashedApi
      */
@@ -33,7 +35,7 @@ class DeployCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'larashed:deploy';
+    protected $signature = 'larashed:deploy {--create : Create a deployment information file}';
 
     /**
      * The console command description.
@@ -53,10 +55,22 @@ class DeployCommand extends Command
         }
 
         $this->measurements = app(Measurements::class);
+
+        // create deployment information file
+        // useful for Docker containers since no .git directory is present during runtime
+        if ($this->option('create')) {
+            $this->createDeploymentFile();
+
+            $this->info('Deployment information stored in .larashed.json');
+
+            return;
+        }
+
         $this->api = app(LarashedApi::class);
 
         try {
             $this->sendDeployment();
+            $this->info('Sent deployment information.');
         } catch (LarashedApiException $exception) {
             $this->error('Failed to send deployment data: ' . $exception->getMessage());
         }
@@ -65,7 +79,7 @@ class DeployCommand extends Command
     }
 
     /**
-     * Check if installed
+     * Notify the agent to quit for an update
      */
     protected function signalAgentQuitForUpdate()
     {
@@ -80,10 +94,37 @@ class DeployCommand extends Command
      */
     protected function sendDeployment()
     {
-        $deployment = $this->getDeploymentInformation();
-        if (!is_null($deployment)) {
-            $this->api->sendEnvironmentDeployment($deployment);
+        $deployment = null;
+
+        if (file_exists($this->getInformationFilePath())) {
+            $contents = json_decode(file_get_contents($this->getInformationFilePath()), true);
+            if (!is_null($contents) && isset($contents['deployment'])) {
+                $deployment = $contents['deployment'];
+            } else {
+                $this->error('Failed to read deployment information from ' . self::INFORMATION_FILE);
+            }
+        } else {
+            $deployment = $this->getDeploymentInformationFromGit();
         }
+
+        if (!is_null($deployment)) {
+            $this->api->sendApplicationDeployment($deployment);
+        }
+    }
+
+    /**
+     * @throws \Larashed\Agent\Api\LarashedApiException
+     */
+    protected function createDeploymentFile()
+    {
+        $deployment = $this->getDeploymentInformationFromGit();
+        unset($deployment['created_at']);
+
+        $file = [
+            'deployment' => $deployment
+        ];
+
+        file_put_contents(base_path(self::INFORMATION_FILE), json_encode($file, JSON_PRETTY_PRINT));
     }
 
     /**
@@ -106,7 +147,7 @@ class DeployCommand extends Command
     /**
      * @return array|null
      */
-    protected function getDeploymentInformation()
+    protected function getDeploymentInformationFromGit()
     {
         $errors = ['not a git repository', 'not found'];
         if (Str::contains($this->exec('git'), $errors)) {
@@ -135,5 +176,10 @@ class DeployCommand extends Command
             'commit_created_at' => $this->measurements->time(Arr::get($data, 'created_at')),
             'created_at'        => $this->measurements->time()
         ];
+    }
+
+    protected function getInformationFilePath()
+    {
+        return base_path(self::INFORMATION_FILE);
     }
 }
