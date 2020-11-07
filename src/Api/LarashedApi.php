@@ -33,9 +33,9 @@ class LarashedApi
      * @return mixed
      * @throws LarashedApiException
      */
-    public function sendEnvironmentDeployment($data)
+    public function sendApplicationDeployment($data)
     {
-        return $this->makePostRequest('agent/environment/deployment', $data);
+        return $this->makePostRequest('agent/app/deployment', $data);
     }
 
     /**
