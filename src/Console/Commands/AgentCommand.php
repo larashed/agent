@@ -6,7 +6,6 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 use Larashed\Agent\Agent;
 use Larashed\Agent\AgentConfig;
-use Larashed\Agent\Api\LarashedApi;
 use Larashed\Agent\Console\GoAgent;
 use Larashed\Agent\Ipc\SocketClient;
 
@@ -36,19 +35,11 @@ class AgentCommand extends Command
     protected $description = 'Runs the Larashed agent';
 
     /**
-     * @var LarashedApi
-     */
-    protected $api;
-
-    /**
      * Starts the daemon and sends collected data
      */
     public function handle()
     {
         $this->performChecks();
-
-        $this->api = app(LarashedApi::class);
-
         $this->runAgent();
     }
 
