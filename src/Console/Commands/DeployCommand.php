@@ -150,7 +150,7 @@ class DeployCommand extends Command
     protected function getDeploymentInformationFromGit()
     {
         $errors = ['not a git repository', 'not found'];
-        if (str_contains($this->exec('git'), $errors)) {
+        if (Str::contains($this->exec('git'), $errors)) {
             return null;
         }
 
@@ -169,7 +169,7 @@ class DeployCommand extends Command
         }
 
         return [
-            'commit_hash'       => array_get($data, 'commit'),
+            'commit_hash'       => Arr::get($data, 'commit'),
             'commit_remote'     => trim($this->exec('git config --get remote.origin.url')),
             'commit_message'    => Arr::get($data, 'message'),
             'commit_author'     => Arr::get($data, 'author'),
