@@ -2,7 +2,6 @@
 
 namespace Larashed\Agent\Trackers\Queue;
 
-use Exception;
 use Illuminate\Contracts\Queue\Job as JobContract;
 use Larashed\Agent\System\Measurements;
 use Larashed\Agent\Trackers\Traits\ExceptionTransformerTrait;
@@ -52,14 +51,41 @@ class Job
     protected $queue;
 
     /**
+     * @var int
+     */
+    protected $queueSize = 0;
+
+    /**
+     * @var
+     */
+    protected $workerPid;
+
+    /**
      * Job constructor.
      *
      * @param Measurements $measurements
+     * @param JobContract $job
      */
     public function __construct(Measurements $measurements, JobContract $job)
     {
         $this->measurements = $measurements;
         $this->job = $this->setAttributes($job);
+    }
+
+    /**
+     * @param int $queueSize
+     */
+    public function setQueueSize(int $queueSize)
+    {
+        $this->queueSize = $queueSize;
+    }
+
+    /**
+     * @param mixed $workerPid
+     */
+    public function setWorkerPid($workerPid)
+    {
+        $this->workerPid = $workerPid;
     }
 
     /**
@@ -69,9 +95,11 @@ class Job
     {
         return [
             'name'         => $this->name,
+            'worker_pid'   => $this->workerPid,
             'attempts'     => $this->attempts,
             'connection'   => $this->connection,
             'queue'        => $this->queue,
+            'queue_size'   => $this->queueSize,
             'created_at'   => $this->createdAt,
             'processed_in' => $this->processedIn,
             'memory'       => $this->memory,

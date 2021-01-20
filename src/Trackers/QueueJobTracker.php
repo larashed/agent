@@ -92,6 +92,7 @@ class QueueJobTracker implements TrackerInterface
     {
         return function (JobProcessing $event) {
             $this->job = new Job($this->measurements, $event->job);
+            $this->job->setWorkerPid(getmypid());
         };
     }
 
@@ -104,6 +105,7 @@ class QueueJobTracker implements TrackerInterface
     {
         return function (JobProcessed $event) {
             if (!is_null($this->job)) {
+                $this->job->setQueueSize(Queue::size($event->job->getQueue()));
                 $this->job->finalize($event->connectionName);
                 $this->agent->stop();
             }
