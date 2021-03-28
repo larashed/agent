@@ -2,6 +2,7 @@
 
 namespace Larashed\Agent\Trackers\Queue;
 
+use Exception;
 use Illuminate\Contracts\Queue\Job as JobContract;
 use Larashed\Agent\System\Measurements;
 use Larashed\Agent\Trackers\Traits\ExceptionTransformerTrait;
@@ -31,7 +32,12 @@ class Job
     protected $measurements;
 
     /**
-     * @var array
+     * @var string
+     */
+    protected $id;
+
+    /**
+     * @var string
      */
     protected $name;
 
@@ -51,41 +57,22 @@ class Job
     protected $queue;
 
     /**
-     * @var int
+     * @var string
      */
-    protected $queueSize = 0;
-
-    /**
-     * @var
-     */
-    protected $workerPid;
+    protected $workerId;
 
     /**
      * Job constructor.
      *
      * @param Measurements $measurements
-     * @param JobContract $job
+     * @param JobContract  $job
+     * @param string       $workerId
      */
-    public function __construct(Measurements $measurements, JobContract $job)
+    public function __construct(Measurements $measurements, JobContract $job, $workerId)
     {
         $this->measurements = $measurements;
         $this->job = $this->setAttributes($job);
-    }
-
-    /**
-     * @param int $queueSize
-     */
-    public function setQueueSize(int $queueSize)
-    {
-        $this->queueSize = $queueSize;
-    }
-
-    /**
-     * @param mixed $workerPid
-     */
-    public function setWorkerPid($workerPid)
-    {
-        $this->workerPid = $workerPid;
+        $this->workerId = $workerId;
     }
 
     /**
@@ -94,12 +81,12 @@ class Job
     public function toArray()
     {
         return [
+            'id'           => $this->id,
             'name'         => $this->name,
-            'worker_pid'   => $this->workerPid,
+            'worker_pid'   => getmypid(),
             'attempts'     => $this->attempts,
             'connection'   => $this->connection,
             'queue'        => $this->queue,
-            'queue_size'   => $this->queueSize,
             'created_at'   => $this->createdAt,
             'processed_in' => $this->processedIn,
             'memory'       => $this->memory,
@@ -132,6 +119,7 @@ class Job
      */
     protected function setAttributes(JobContract $job)
     {
+        $this->id = $job->getJobId();
         $this->name = $job->resolveName();
         $this->attempts = $job->attempts();
         $this->setStartedAt($this->measurements->microtime());

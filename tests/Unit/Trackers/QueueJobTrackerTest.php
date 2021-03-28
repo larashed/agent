@@ -114,6 +114,7 @@ class QueueJobTrackerTest extends TestCase
         $job->shouldReceive('resolveName')->andReturn('Job');
         $job->shouldReceive('attempts')->andReturn(3);
         $job->shouldReceive('getQueue')->andReturn('default');
+        $job->shouldReceive('getJobId')->andReturn('xxx');
 
         return $job;
     }

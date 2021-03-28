@@ -3,15 +3,23 @@
 namespace Larashed\Agent;
 
 use Illuminate\Contracts\Http\Kernel as HttpKernel;
+use Illuminate\Contracts\Queue\Factory as QueueFactoryContract;
+use Illuminate\Queue\QueueManager;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Contracts\Debug\ExceptionHandler as ExceptionHandlerContract;
 use Larashed\Agent\Api\LarashedApi;
+use Larashed\Agent\Bus\Dispatcher;
 use Larashed\Agent\Console\Commands\AgentCommand;
 use Larashed\Agent\Console\Commands\AgentQuitCommand;
 use Larashed\Agent\Console\Commands\DeployCommand;
+use Larashed\Agent\Console\Worker;
 use Larashed\Agent\Console\GoAgent;
 use Larashed\Agent\Http\Middlewares\RequestTrackerMiddleware;
 use Larashed\Agent\Ipc\SocketClient;
+use Larashed\Agent\Queue\Connectors\BeanstalkdConnector;
+use Larashed\Agent\Queue\Connectors\DatabaseConnector;
+use Larashed\Agent\Queue\Connectors\RedisConnector;
+use Larashed\Agent\Queue\Connectors\SqsConnector;
 use Larashed\Agent\System\Measurements;
 use Larashed\Agent\Trackers\Database\QueryExcluder;
 use Larashed\Agent\Trackers\Database\QueryExcluderConfig;
@@ -19,7 +27,9 @@ use Larashed\Agent\Trackers\DatabaseQueryTracker;
 use Larashed\Agent\Trackers\HttpRequestTracker;
 use Larashed\Agent\Trackers\ArtisanCommandTracker;
 use Larashed\Agent\Trackers\LogTracker;
+use Larashed\Agent\Trackers\QueueJobDispatchTracker;
 use Larashed\Agent\Trackers\QueueJobTracker;
+use Larashed\Agent\Trackers\QueueWorkerTracker;
 use Larashed\Agent\Trackers\WebhookRequestTracker;
 use Larashed\Agent\Transport\SocketTransport;
 use Larashed\Agent\Transport\TransportInterface;
@@ -66,7 +76,10 @@ class AgentServiceProvider extends ServiceProvider
         $this->app->singleton(LarashedApi::class, $this->getLarashedApiInstance());
         $this->app->singleton(RequestTrackerMiddleware::class);
         $this->app->singleton(Agent::class, $this->getAgentInstance());
+        //        $this->app->extend(BaseDispatcher::class, $this->replaceDispatcher());
+        $this->app->extend('queue.worker', $this->replaceQueueWorker());
 
+        $this->registerQueueConnectors();
         $this->replaceExceptionHandler();
         $this->loadMiddlewares();
         $this->loadRoutes();
@@ -199,6 +212,8 @@ class AgentServiceProvider extends ServiceProvider
             $agent->addTracker('request', new HttpRequestTracker($app['events'], $app[Measurements::class]));
             $agent->addTracker('webhook', new WebhookRequestTracker($app['events'], $app[Measurements::class]));
             $agent->addTracker('job', new QueueJobTracker($agent, $app[Measurements::class]));
+            $agent->addTracker('worker', new QueueWorkerTracker($app['events'], $app[Measurements::class], $app[LarashedApi::class]));
+            $agent->addTracker('dispatched_jobs', new QueueJobDispatchTracker($app['events'], $app[Measurements::class]));
 
             if (app()->runningInConsole()) {
                 $agent->addTracker('command', new ArtisanCommandTracker($agent, $app['events'], $app[Measurements::class]));
@@ -206,6 +221,24 @@ class AgentServiceProvider extends ServiceProvider
 
             return $agent;
         };
+    }
+
+    protected function registerQueueConnectors()
+    {
+        $this->app->resolving(QueueManager::class, function ($manager) {
+            $manager->addConnector('redis', function () {
+                return new RedisConnector($this->app['redis']);
+            });
+            $manager->addConnector('database', function () {
+                return new DatabaseConnector($this->app['db']);
+            });
+            $manager->addConnector('beanstalkd', function () {
+                return new BeanstalkdConnector();
+            });
+            $manager->addConnector('sqs', function () {
+                return new SqsConnector();
+            });
+        });
     }
 
     /**
@@ -223,5 +256,30 @@ class AgentServiceProvider extends ServiceProvider
                 'Larashed\Agent\Errors\ExceptionHandler'
             );
         }
+    }
+
+    protected function replaceDispatcher()
+    {
+        return function ($dispatcher) {
+            return new Dispatcher($this->app, function ($connection = null) {
+                return $this->app[QueueFactoryContract::class]->connection($connection);
+            });
+        };
+    }
+
+    protected function replaceQueueWorker()
+    {
+        return function ($worker) {
+            $isDownForMaintenance = function () {
+                return $this->app->isDownForMaintenance();
+            };
+
+            return new Worker(
+                $this->app['queue'],
+                $this->app['events'],
+                $this->app[ExceptionHandlerContract::class],
+                $isDownForMaintenance
+            );
+        };
     }
 }

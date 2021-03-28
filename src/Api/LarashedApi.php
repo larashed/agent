@@ -30,7 +30,7 @@ class LarashedApi
     /**
      * @param $data
      *
-     * @return mixed
+     * @return array
      * @throws LarashedApiException
      */
     public function sendApplicationDeployment($data)
@@ -39,10 +39,32 @@ class LarashedApi
     }
 
     /**
+     * @param array $data
+     *
+     * @return array
+     * @throws LarashedApiException
+     */
+    public function sendQueueWorkerStartEvent($data)
+    {
+        return $this->makePostRequest('agent/app/queue-worker/start', $data);
+    }
+
+    /**
+     * @param array $data
+     *
+     * @return array
+     * @throws LarashedApiException
+     */
+    public function sendQueueWorkerStopEvent($data)
+    {
+        return $this->makePostRequest('agent/app/queue-worker/stop', $data);
+    }
+
+    /**
      * @param       $endpoint
      * @param mixed $body
      *
-     * @return mixed
+     * @return array
      *
      * @throws LarashedApiException
      */

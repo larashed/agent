@@ -8,6 +8,7 @@ use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Support\Facades\Queue;
 use Larashed\Agent\Agent;
+use Larashed\Agent\Console\Worker;
 use Larashed\Agent\System\Measurements;
 use Larashed\Agent\Trackers\Queue\Job;
 
@@ -91,8 +92,7 @@ class QueueJobTracker implements TrackerInterface
     protected function onJobStartCallback()
     {
         return function (JobProcessing $event) {
-            $this->job = new Job($this->measurements, $event->job);
-            $this->job->setWorkerPid(getmypid());
+            $this->job = new Job($this->measurements, $event->job, Worker::$workerId);
         };
     }
 
@@ -105,7 +105,6 @@ class QueueJobTracker implements TrackerInterface
     {
         return function (JobProcessed $event) {
             if (!is_null($this->job)) {
-                $this->job->setQueueSize(Queue::size($event->job->getQueue()));
                 $this->job->finalize($event->connectionName);
                 $this->agent->stop();
             }
