@@ -28,4 +28,24 @@ class RedisQueue extends BaseQueue
 
         return $id;
     }
+
+    /**
+     * Push a raw job onto the queue after a delay.
+     *
+     * @param \DateTimeInterface|\DateInterval|int $delay
+     * @param string                               $payload
+     * @param string|null                          $queue
+     *
+     * @return mixed
+     */
+    protected function laterRaw($delay, $payload, $queue = null)
+    {
+        $id = parent::laterRaw($delay, $payload, $queue);
+
+        $this->dispatchEvent(
+            new JobDispatched($id, $this->getConnectionName(), $this->getQueue($queue), $this->availableAt($delay))
+        );
+
+        return $id;
+    }
 }

@@ -42,8 +42,8 @@ class QueueWorkerTracker implements TrackerInterface
 
     public function bind()
     {
-        $this->events->listen(WorkerStarting::class, [$this, 'onWorkerStartEvent']);
-        $this->events->listen(WorkerStopping::class, [$this, 'onWorkerStopEvent']);
+        $this->events->listen(WorkerStarting::class, [$this, 'handleWorkerStartEvent']);
+        $this->events->listen(WorkerStopping::class, [$this, 'handleWorkerStopEvent']);
     }
 
     public function gather()
@@ -55,28 +55,30 @@ class QueueWorkerTracker implements TrackerInterface
     {
     }
 
-    public function onWorkerStartEvent(WorkerStarting $event)
+    public function handleWorkerStartEvent(WorkerStarting $event)
     {
         $this->api->sendQueueWorkerStartEvent([
-            'connection'          => $event->connection,
-            'queue'               => $event->queue,
-            'name'                => $event->options->name,
-            'pid'                 => getmypid(),
-            'worker_id'           => Worker::$workerId,
-            'max_time'            => $event->options->maxTime,
-            'max_jobs'            => $event->options->maxJobs,
-            'max_tries'           => $event->options->maxTries,
-            'memory_usage'        => memory_get_usage(true),
-            'memory_limit'        => $event->options->memory,
-            'time_limit'          => $event->options->timeout,
-            'stop_when_empty'     => $event->options->stopWhenEmpty,
-            'retry_after_seconds' => $event->options->backoff,
-            'sleep'               => $event->options->sleep,
-            'run_in_maintenance'  => $event->options->force,
+            'connection'   => $event->connection,
+            'queue'        => $event->queue,
+            'pid'          => getmypid(),
+            'worker_id'    => Worker::$workerId,
+            'memory_usage' => memory_get_usage(true),
+            'options'      => [
+                'name'                => $event->options->name,
+                'max_time'            => $event->options->maxTime,
+                'max_jobs'            => $event->options->maxJobs,
+                'max_tries'           => $event->options->maxTries,
+                'memory_limit'        => $event->options->memory,
+                'time_limit'          => $event->options->timeout,
+                'stop_when_empty'     => $event->options->stopWhenEmpty,
+                'retry_after_seconds' => $event->options->backoff,
+                'sleep'               => $event->options->sleep,
+                'run_in_maintenance'  => $event->options->force,
+            ]
         ]);
     }
 
-    public function onWorkerStopEvent(WorkerStopping $event)
+    public function handleWorkerStopEvent(WorkerStopping $event)
     {
         $this->api->sendQueueWorkerStopEvent([
             'worker_id'  => Worker::$workerId,

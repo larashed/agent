@@ -5,6 +5,7 @@ namespace Larashed\Agent\Trackers;
 use Illuminate\Contracts\Events\Dispatcher as DispatcherInterface;
 use Larashed\Agent\Events\JobDispatched;
 use Larashed\Agent\System\Measurements;
+use Laravel\Horizon\Events\JobPushed;
 
 class QueueJobDispatchTracker implements TrackerInterface
 {
@@ -21,7 +22,7 @@ class QueueJobDispatchTracker implements TrackerInterface
     /**
      * @var array
      */
-    protected $jobs = [];
+    protected $dispatchedJobs = [];
 
     /**
      * QueueJobDispatchTracker constructor.
@@ -35,23 +36,55 @@ class QueueJobDispatchTracker implements TrackerInterface
         $this->measurements = $measurements;
     }
 
+    /**
+     * @return void
+     */
     public function bind()
     {
-        $this->events->listen(JobDispatched::class, [$this, 'onJobDispatchedEvent']);
+        if (class_exists('Laravel\Horizon\Events\JobPushed')) {
+            $this->events->listen('Laravel\Horizon\Events\JobPushed', [$this, 'handleHorizonJobDispatchEvent']);
+        }
+
+        $this->events->listen(JobDispatched::class, [$this, 'handleJobDispatchEvent']);
     }
 
+    /**
+     * @return array
+     */
     public function gather()
     {
-        return collect($this->jobs);
+        return $this->dispatchedJobs;
     }
 
+    /**
+     * @return void
+     */
     public function cleanup()
     {
-        $this->jobs = [];
+        $this->dispatchedJobs = [];
     }
 
-    public function onJobDispatchedEvent(JobDispatched $event)
+    public function handleJobDispatchEvent(JobDispatched $event)
     {
-        $this->jobs[] = $event->toArray();
+        $this->dispatchedJobs[] = [
+            'dispatched_at' => $event->dispatchedAt,
+            'id'            => $event->id,
+            'connection'    => $event->connection,
+            'queue'         => $event->queue
+        ];
+    }
+
+    /**
+     * @param $event
+     */
+    public function handleHorizonJobDispatchEvent($event)
+    {
+        /** @var $event JobPushed */
+        $this->dispatchedJobs[] = [
+            'dispatched_at' => $this->measurements->time(),
+            'id'            => $event->payload->id(),
+            'connection'    => $event->connectionName,
+            'queue'         => $event->queue
+        ];
     }
 }

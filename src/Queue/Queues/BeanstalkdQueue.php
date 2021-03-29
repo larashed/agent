@@ -55,7 +55,9 @@ class BeanstalkdQueue extends BaseQueue
                     $this->timeToRun
                 );
 
-                $this->dispatchEvent(new JobDispatched($job->getId(), $this->getConnectionName(), $this->getQueue($queue)));
+                $this->dispatchEvent(
+                    new JobDispatched($job->getId(), $this->getConnectionName(), $this->getQueue($queue), $this->availableAt($delay))
+                );
 
                 return $job;
             }

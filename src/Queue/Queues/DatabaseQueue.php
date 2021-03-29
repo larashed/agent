@@ -26,7 +26,7 @@ class DatabaseQueue extends BaseQueue
         ));
 
         $this->dispatchEvent(
-            new JobDispatched($id, $this->getConnectionName(), $this->getQueue($queue))
+            new JobDispatched($id, $this->getConnectionName(), $this->getQueue($queue), $this->availableAt($delay))
         );
 
         return $id;

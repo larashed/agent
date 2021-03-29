@@ -60,7 +60,8 @@ class SqsQueue extends BaseQueue
                 $this->dispatchEvent(new JobDispatched(
                     $id,
                     $this->getConnectionName(),
-                    $this->formatQueueName($this->getQueue($queue))
+                    $this->formatQueueName($this->getQueue($queue)),
+                    $this->availableAt($delay)
                 ));
 
                 return $id;
