@@ -83,6 +83,7 @@ class Job
         return [
             'id'           => $this->id,
             'name'         => $this->name,
+            'worker_id'    => $this->workerId,
             'worker_pid'   => getmypid(),
             'attempts'     => $this->attempts,
             'connection'   => $this->connection,
