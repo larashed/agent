@@ -2,12 +2,13 @@
 
 namespace Larashed\Agent\Queue\Queues;
 
+use Carbon\Carbon;
 use Illuminate\Queue\SqsQueue as BaseQueue;
 use Larashed\Agent\Events\JobDispatched;
 
 class SqsQueue extends BaseQueue
 {
-    use DispatchEventTrait;
+    use DispatchesEvent;
 
     /**
      * Push a raw payload onto the queue.
@@ -20,6 +21,8 @@ class SqsQueue extends BaseQueue
      */
     public function pushRaw($payload, $queue = null, array $options = [])
     {
+        $now = Carbon::now();
+
         $id = $this->sqs->sendMessage([
             'QueueUrl' => $this->getQueue($queue), 'MessageBody' => $payload,
         ])->get('MessageId');
@@ -27,7 +30,8 @@ class SqsQueue extends BaseQueue
         $this->dispatchEvent(new JobDispatched(
             $id,
             $this->getConnectionName(),
-            $this->formatQueueName($this->getQueue($queue))
+            $this->formatQueueName($this->getQueue($queue)),
+            $now,
         ));
 
         return $id;
@@ -51,6 +55,8 @@ class SqsQueue extends BaseQueue
             $queue,
             $delay,
             function ($payload, $queue, $delay) {
+                $now = Carbon::now();
+
                 $id = $this->sqs->sendMessage([
                     'QueueUrl'     => $this->getQueue($queue),
                     'MessageBody'  => $payload,
@@ -61,6 +67,7 @@ class SqsQueue extends BaseQueue
                     $id,
                     $this->getConnectionName(),
                     $this->formatQueueName($this->getQueue($queue)),
+                    $now,
                     $this->availableAt($delay)
                 ));
 

@@ -5,7 +5,7 @@ namespace Larashed\Agent\Queue\Queues;
 use Illuminate\Contracts\Events\Dispatcher;
 use Larashed\Agent\Events\JobDispatched;
 
-trait DispatchEventTrait
+trait DispatchesEvent
 {
     protected function dispatchEvent(JobDispatched $event)
     {

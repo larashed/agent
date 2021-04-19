@@ -2,6 +2,7 @@
 
 namespace Larashed\Agent\Events;
 
+use Carbon\Carbon;
 use Larashed\Agent\System\Measurements;
 
 class JobDispatched
@@ -14,16 +15,20 @@ class JobDispatched
     /**
      * JobDispatched constructor.
      *
-     * @param $id
-     * @param $connection
-     * @param $queue
-     * @param null $delay
+     * @param          $id
+     * @param          $connection
+     * @param          $queue
+     * @param Carbon   $timestamp
+     * @param int      $delay
      */
-    public function __construct($id, $connection, $queue, $delay = null)
+    public function __construct($id, $connection, $queue, Carbon $timestamp, $delay = 0)
     {
         $this->id = (string) $id;
         $this->queue = str_replace('queues:', '', $queue);
         $this->connection = $connection;
-        $this->dispatchedAt = app(Measurements::class)->militime($delay);
+
+        /** @var Measurements $measurements */
+        $measurements = app(Measurements::class);
+        $this->dispatchedAt = $measurements->datetimeWithDelay($timestamp, $delay);
     }
 }

@@ -22,6 +22,21 @@ class Measurements
     }
 
     /**
+     * @param Carbon $timestamp
+     * @param int    $delay
+     *
+     * @return string
+     */
+    public function datetimeWithDelay($timestamp, $delay)
+    {
+        if (!empty($delay)) {
+            $timestamp->addRealSeconds(abs($delay - $timestamp->unix()));
+        }
+
+        return $timestamp->format("Y-m-d\TH:i:s.uP");
+    }
+
+    /**
      * @param null $timestamp
      *
      * @return string

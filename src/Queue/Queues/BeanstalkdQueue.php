@@ -2,13 +2,14 @@
 
 namespace Larashed\Agent\Queue\Queues;
 
+use Carbon\Carbon;
 use Illuminate\Queue\BeanstalkdQueue as BaseQueue;
 use Larashed\Agent\Events\JobDispatched;
 use Pheanstalk\Pheanstalk;
 
 class BeanstalkdQueue extends BaseQueue
 {
-    use DispatchEventTrait;
+    use DispatchesEvent;
 
     /**
      * Push a raw payload onto the queue.
@@ -21,11 +22,18 @@ class BeanstalkdQueue extends BaseQueue
      */
     public function pushRaw($payload, $queue = null, array $options = [])
     {
+        $now = Carbon::now();
+
         $job = $this->pheanstalk->useTube($this->getQueue($queue))->put(
             $payload, Pheanstalk::DEFAULT_PRIORITY, Pheanstalk::DEFAULT_DELAY, $this->timeToRun
         );
 
-        $this->dispatchEvent(new JobDispatched($job->getId(), $this->getConnectionName(), $this->getQueue($queue)));
+        $this->dispatchEvent(new JobDispatched(
+            $job->getId(),
+            $this->getConnectionName(),
+            $this->getQueue($queue),
+            $now
+        ));
 
         return $job;
     }
@@ -48,16 +56,22 @@ class BeanstalkdQueue extends BaseQueue
             $queue,
             $delay,
             function ($payload, $queue, $delay) {
-                $job =  $this->pheanstalk->useTube($this->getQueue($queue))->put(
+                $now = Carbon::now();
+
+                $job = $this->pheanstalk->useTube($this->getQueue($queue))->put(
                     $payload,
                     Pheanstalk::DEFAULT_PRIORITY,
                     $this->secondsUntil($delay),
                     $this->timeToRun
                 );
 
-                $this->dispatchEvent(
-                    new JobDispatched($job->getId(), $this->getConnectionName(), $this->getQueue($queue), $this->availableAt($delay))
-                );
+                $this->dispatchEvent(new JobDispatched(
+                    $job->getId(),
+                    $this->getConnectionName(),
+                    $this->getQueue($queue),
+                    $now,
+                    $this->availableAt($delay)
+                ));
 
                 return $job;
             }

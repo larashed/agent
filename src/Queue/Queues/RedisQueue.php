@@ -2,12 +2,13 @@
 
 namespace Larashed\Agent\Queue\Queues;
 
+use Carbon\Carbon;
 use Illuminate\Queue\RedisQueue as BaseQueue;
 use Larashed\Agent\Events\JobDispatched;
 
 class RedisQueue extends BaseQueue
 {
-    use DispatchEventTrait;
+    use DispatchesEvent;
 
     /**
      * Push a raw payload onto the queue.
@@ -20,10 +21,12 @@ class RedisQueue extends BaseQueue
      */
     public function pushRaw($payload, $queue = null, array $options = [])
     {
+        $now = Carbon::now();
+
         $id = parent::pushRaw($payload, $queue, $options);
 
         $this->dispatchEvent(
-            new JobDispatched($id, $this->getConnectionName(), $this->getQueue($queue))
+            new JobDispatched($id, $this->getConnectionName(), $this->getQueue($queue), $now)
         );
 
         return $id;
@@ -40,11 +43,17 @@ class RedisQueue extends BaseQueue
      */
     protected function laterRaw($delay, $payload, $queue = null)
     {
+        $now = Carbon::now();
+
         $id = parent::laterRaw($delay, $payload, $queue);
 
-        $this->dispatchEvent(
-            new JobDispatched($id, $this->getConnectionName(), $this->getQueue($queue), $this->availableAt($delay))
-        );
+        $this->dispatchEvent(new JobDispatched(
+            $id,
+            $this->getConnectionName(),
+            $this->getQueue($queue),
+            $now,
+            $this->availableAt($delay)
+        ));
 
         return $id;
     }
