@@ -24,6 +24,6 @@ class JobDispatched
         $this->id = (string) $id;
         $this->queue = str_replace('queues:', '', $queue);
         $this->connection = $connection;
-        $this->dispatchedAt = app(Measurements::class)->time($delay);
+        $this->dispatchedAt = app(Measurements::class)->militime($delay);
     }
 }

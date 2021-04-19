@@ -124,7 +124,7 @@ class Job
         $this->name = $job->resolveName();
         $this->attempts = $job->attempts();
         $this->setStartedAt($this->measurements->microtime());
-        $this->setCreatedAt($this->measurements->time());
+        $this->setCreatedAt($this->measurements->militime());
         $this->setStartMemoryUsage($this->measurements->memory());
 
         return $job;

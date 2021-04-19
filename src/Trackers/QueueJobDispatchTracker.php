@@ -81,7 +81,7 @@ class QueueJobDispatchTracker implements TrackerInterface
     {
         /** @var $event JobPushed */
         $this->dispatchedJobs[] = [
-            'dispatched_at' => $this->measurements->time(),
+            'dispatched_at' => $this->measurements->microtime(),
             'id'            => $event->payload->id(),
             'connection'    => $event->connectionName,
             'queue'         => $event->queue
