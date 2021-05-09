@@ -61,6 +61,17 @@ class LarashedApi
     }
 
     /**
+     * @param array $data
+     *
+     * @return array
+     * @throws LarashedApiException
+     */
+    public function sendQueueWorkerPing($data)
+    {
+        return $this->makePostRequest('agent/app/queue-worker/ping', $data);
+    }
+
+    /**
      * @param       $endpoint
      * @param mixed $body
      *

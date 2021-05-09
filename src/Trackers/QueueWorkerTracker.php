@@ -3,6 +3,7 @@
 namespace Larashed\Agent\Trackers;
 
 use Illuminate\Contracts\Events\Dispatcher as DispatcherInterface;
+use Illuminate\Queue\Events\Looping;
 use Illuminate\Queue\Events\WorkerStopping;
 use Larashed\Agent\Api\LarashedApi;
 use Larashed\Agent\Console\Worker;
@@ -27,6 +28,11 @@ class QueueWorkerTracker implements TrackerInterface
     protected $api;
 
     /**
+     * @var int
+     */
+    protected $count = 0;
+
+    /**
      * HttpRequestTracker constructor.
      *
      * @param DispatcherInterface $events
@@ -44,6 +50,7 @@ class QueueWorkerTracker implements TrackerInterface
     {
         $this->events->listen(WorkerStarting::class, [$this, 'handleWorkerStartEvent']);
         $this->events->listen(WorkerStopping::class, [$this, 'handleWorkerStopEvent']);
+        $this->events->listen(Looping::class, [$this, 'handleWorkerLoopEvent']);
     }
 
     public function gather()
@@ -85,5 +92,17 @@ class QueueWorkerTracker implements TrackerInterface
             'exit_code'  => $event->status,
             'stopped_at' => $this->measurements->time(),
         ]);
+    }
+
+    public function handleWorkerLoopEvent(Looping $event)
+    {
+        if ($this->count % 10 == 0) {
+            $this->api->sendQueueWorkerPing([
+                'worker_id' => Worker::$workerId,
+                'pid'       => getmypid(),
+            ]);
+        }
+
+        $this->count++;
     }
 }
