@@ -2,8 +2,6 @@
 
 namespace Larashed\Agent\Tests\Integration;
 
-use Illuminate\Http\Response;
-use Larashed\Agent\Tests\Helpers\LaravelVersion;
 use Orchestra\Testbench\TestCase;
 use Illuminate\Support\Facades\Route;
 use Larashed\Agent\Http\Controllers\HealthCheckController;
