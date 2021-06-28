@@ -2,6 +2,10 @@
 
 namespace Larashed\Agent\Ipc;
 
+use Exception;
+use Illuminate\Support\Facades\Log;
+use Larashed\Agent\AgentConfig;
+
 class SocketClient
 {
     const QUIT = 'quit';
@@ -72,11 +76,15 @@ class SocketClient
             return;
         }
 
+        $timeout = 1.0;
+
         try {
-            $sock = stream_socket_client($this->type . '://' . $this->address, $errorNumber, $errorMessage);
+            $sock = stream_socket_client($this->type . '://' . $this->address, $errorNumber, $errorMessage, $timeout);
             fwrite($sock, $message);
-        } catch (\Exception $e) {
-            // ignore error
+        } catch (Exception $exception) {
+            if (AgentConfig::debug()) {
+                Log::error('larashed-agent.ipc', [$exception->getMessage()]);
+            }
         }
     }
 }
