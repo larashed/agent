@@ -60,7 +60,7 @@ class AgentConfig
      * @param string $environment
      * @param string $storageDirectory
      * @param string $url
-     * @param bool   $cert
+     * @param bool $cert
      */
     public function __construct(
         $applicationId,
@@ -185,6 +185,14 @@ class AgentConfig
     public function getIgnoredEndpoints()
     {
         return config('larashed.ignored_endpoints', []);
+    }
+
+    /**
+     * @return bool
+     */
+    public static function debug()
+    {
+        return config('larashed.debug', false);
     }
 
     /**

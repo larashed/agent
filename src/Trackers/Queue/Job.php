@@ -32,7 +32,12 @@ class Job
     protected $measurements;
 
     /**
-     * @var array
+     * @var string
+     */
+    protected $id;
+
+    /**
+     * @var string
      */
     protected $name;
 
@@ -52,14 +57,22 @@ class Job
     protected $queue;
 
     /**
+     * @var string
+     */
+    protected $workerId;
+
+    /**
      * Job constructor.
      *
      * @param Measurements $measurements
+     * @param JobContract  $job
+     * @param string       $workerId
      */
-    public function __construct(Measurements $measurements, JobContract $job)
+    public function __construct(Measurements $measurements, JobContract $job, $workerId)
     {
         $this->measurements = $measurements;
         $this->job = $this->setAttributes($job);
+        $this->workerId = $workerId;
     }
 
     /**
@@ -68,7 +81,10 @@ class Job
     public function toArray()
     {
         return [
+            'id'           => $this->id,
             'name'         => $this->name,
+            'worker_id'    => $this->workerId,
+            'worker_pid'   => getmypid(),
             'attempts'     => $this->attempts,
             'connection'   => $this->connection,
             'queue'        => $this->queue,
@@ -104,10 +120,11 @@ class Job
      */
     protected function setAttributes(JobContract $job)
     {
+        $this->id = $job->getJobId();
         $this->name = $job->resolveName();
         $this->attempts = $job->attempts();
         $this->setStartedAt($this->measurements->microtime());
-        $this->setCreatedAt($this->measurements->time());
+        $this->setCreatedAt($this->measurements->militime());
         $this->setStartMemoryUsage($this->measurements->memory());
 
         return $job;

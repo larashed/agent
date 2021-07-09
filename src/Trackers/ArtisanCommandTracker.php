@@ -43,7 +43,8 @@ class ArtisanCommandTracker implements TrackerInterface
      * @var array
      */
     protected $ignoredCommands = [
-        'queue:work'
+        'queue:work',
+        'horizon:work'
     ];
 
     /**

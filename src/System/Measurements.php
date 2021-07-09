@@ -22,6 +22,35 @@ class Measurements
     }
 
     /**
+     * @param Carbon $timestamp
+     * @param int    $delay
+     *
+     * @return string
+     */
+    public function datetimeWithDelay($timestamp, $delay)
+    {
+        if (!empty($delay)) {
+            $timestamp->addRealSeconds(abs($delay - $timestamp->unix()));
+        }
+
+        return $timestamp->format("Y-m-d\TH:i:s.uP");
+    }
+
+    /**
+     * @param null $timestamp
+     *
+     * @return string
+     */
+    public function militime($timestamp = null)
+    {
+        if (!is_null($timestamp)) {
+            return Carbon::createFromTimestampUTC(round($timestamp, 0))->getPreciseTimestamp(3);
+        }
+
+        return Carbon::now()->getPreciseTimestamp(3);
+    }
+
+    /**
      * @param null $timestamp
      *
      * @return string

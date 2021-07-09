@@ -17,6 +17,11 @@ return [
     'ignored_environments' => env('LARASHED_IGNORED_ENVS', 'testing'),
 
     /*
+     * Enable debugging mode
+     */
+    'debug'                => env('LARASHED_DEBUG', false),
+
+    /*
     |--------------------------------------------------------------------------
     | Log tracking
     |--------------------------------------------------------------------------
@@ -24,7 +29,7 @@ return [
     | Controls log collection
     |
     */
-    'logging_enabled'      => env('LARASHED_COLLECT_LOGS', false),
+    'collect_logs'         => env('LARASHED_COLLECT_LOGS', false),
 
     /*
     |--------------------------------------------------------------------------
@@ -69,6 +74,7 @@ return [
             ]
         ]
     ],
+
     /*
     |--------------------------------------------------------------------------
     | User information tracking
@@ -82,5 +88,20 @@ return [
     'user'                 => [
         'enabled' => env('LARASHED_COLLECT_USER_DATA', true),
         'guard'   => null
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Queue tracking
+    |--------------------------------------------------------------------------
+    |
+    | Queue tracking settings
+    |
+    */
+    'queue'                => [
+        'worker' => [
+            // number of seconds before the worker Looping event should send a ping
+            'ping_interval' => env('LARASHED_QUEUE_WORKER_PING_INTERVAL', 10)
+        ]
     ]
 ];

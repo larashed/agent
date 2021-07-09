@@ -2,16 +2,22 @@
 
 namespace Larashed\Agent;
 
+use Closure;
 use Illuminate\Contracts\Http\Kernel as HttpKernel;
+use Illuminate\Queue\QueueManager;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Contracts\Debug\ExceptionHandler as ExceptionHandlerContract;
 use Larashed\Agent\Api\LarashedApi;
 use Larashed\Agent\Console\Commands\AgentCommand;
 use Larashed\Agent\Console\Commands\AgentQuitCommand;
 use Larashed\Agent\Console\Commands\DeployCommand;
-use Larashed\Agent\Console\GoAgent;
+use Larashed\Agent\Console\Worker;
 use Larashed\Agent\Http\Middlewares\RequestTrackerMiddleware;
 use Larashed\Agent\Ipc\SocketClient;
+use Larashed\Agent\Queue\Connectors\BeanstalkdConnector;
+use Larashed\Agent\Queue\Connectors\DatabaseConnector;
+use Larashed\Agent\Queue\Connectors\RedisConnector;
+use Larashed\Agent\Queue\Connectors\SqsConnector;
 use Larashed\Agent\System\Measurements;
 use Larashed\Agent\Trackers\Database\QueryExcluder;
 use Larashed\Agent\Trackers\Database\QueryExcluderConfig;
@@ -19,11 +25,12 @@ use Larashed\Agent\Trackers\DatabaseQueryTracker;
 use Larashed\Agent\Trackers\HttpRequestTracker;
 use Larashed\Agent\Trackers\ArtisanCommandTracker;
 use Larashed\Agent\Trackers\LogTracker;
+use Larashed\Agent\Trackers\QueueJobDispatchTracker;
 use Larashed\Agent\Trackers\QueueJobTracker;
+use Larashed\Agent\Trackers\QueueWorkerTracker;
 use Larashed\Agent\Trackers\WebhookRequestTracker;
 use Larashed\Agent\Transport\SocketTransport;
 use Larashed\Agent\Transport\TransportInterface;
-
 
 class AgentServiceProvider extends ServiceProvider
 {
@@ -47,14 +54,8 @@ class AgentServiceProvider extends ServiceProvider
     public function register()
     {
         $this->loadConfig();
-
         $this->app->singleton(AgentConfig::class, $this->getAgentConfigInstance());
-
-        $this->commands([
-            DeployCommand::class,
-            AgentCommand::class,
-            AgentQuitCommand::class,
-        ]);
+        $this->commands([DeployCommand::class, AgentCommand::class, AgentQuitCommand::class]);
 
         if (!Agent::isEnabled()) {
             return;
@@ -67,7 +68,10 @@ class AgentServiceProvider extends ServiceProvider
         $this->app->singleton(RequestTrackerMiddleware::class);
         $this->app->singleton(Agent::class, $this->getAgentInstance());
 
+        $this->replaceQueueWorker();
+        $this->replaceQueueConnectors();
         $this->replaceExceptionHandler();
+
         $this->loadMiddlewares();
         $this->loadRoutes();
     }
@@ -106,23 +110,9 @@ class AgentServiceProvider extends ServiceProvider
     }
 
     /**
-     * Buils GoAgent
-     *
-     * @return \Closure
-     */
-    protected function getGoAgentInstance()
-    {
-        return function ($app) {
-            return new GoAgent(
-                $app[AgentConfig::class], $app[SocketClient::class]
-            );
-        };
-    }
-
-    /**
      * Builds Larashed API client
      *
-     * @return \Closure
+     * @return Closure
      */
     protected function getLarashedApiInstance()
     {
@@ -134,7 +124,7 @@ class AgentServiceProvider extends ServiceProvider
     }
 
     /**
-     * @return \Closure
+     * @return Closure
      */
     protected function getTransportInstance()
     {
@@ -145,6 +135,9 @@ class AgentServiceProvider extends ServiceProvider
         };
     }
 
+    /**
+     * @return Closure
+     */
     protected function getSocketClientInstance()
     {
         return function ($app) {
@@ -166,6 +159,9 @@ class AgentServiceProvider extends ServiceProvider
         };
     }
 
+    /**
+     * @return Closure
+     */
     protected function getAgentConfigInstance()
     {
         return function () {
@@ -183,7 +179,7 @@ class AgentServiceProvider extends ServiceProvider
     /**
      * Builds Agent instance
      *
-     * @return \Closure
+     * @return Closure
      */
     protected function getAgentInstance()
     {
@@ -191,17 +187,26 @@ class AgentServiceProvider extends ServiceProvider
             $queryExcluder = new QueryExcluder(QueryExcluderConfig::fromConfig());
 
             $agent = new Agent($app[TransportInterface::class]);
-            if (config('larashed.logging_enabled')) {
+            if (config('larashed.collect_logs')) {
                 $agent->addTracker('logs', new LogTracker($app['events']));
             }
 
-            $agent->addTracker('queries', new DatabaseQueryTracker($app[Measurements::class], $queryExcluder));
-            $agent->addTracker('request', new HttpRequestTracker($app['events'], $app[Measurements::class]));
-            $agent->addTracker('webhook', new WebhookRequestTracker($app['events'], $app[Measurements::class]));
-            $agent->addTracker('job', new QueueJobTracker($agent, $app[Measurements::class]));
+            $measurements = $app[Measurements::class];
+
+            $agent->addTracker('queries', new DatabaseQueryTracker($measurements, $queryExcluder));
+            $agent->addTracker('request', new HttpRequestTracker($app['events'], $measurements));
+            $agent->addTracker('webhook', new WebhookRequestTracker($app['events'], $measurements));
+            $agent->addTracker('job', new QueueJobTracker($agent, $measurements));
+            $agent->addTracker('worker', new QueueWorkerTracker(
+                $app['events'],
+                $measurements,
+                $app[LarashedApi::class],
+                config('larashed.queue.worker.ping_interval')
+            ));
+            $agent->addTracker('dispatched_jobs', new QueueJobDispatchTracker($app['events'], $measurements));
 
             if (app()->runningInConsole()) {
-                $agent->addTracker('command', new ArtisanCommandTracker($agent, $app['events'], $app[Measurements::class]));
+                $agent->addTracker('command', new ArtisanCommandTracker($agent, $app['events'], $measurements));
             }
 
             return $agent;
@@ -223,5 +228,50 @@ class AgentServiceProvider extends ServiceProvider
                 'Larashed\Agent\Errors\ExceptionHandler'
             );
         }
+    }
+
+    /**
+     * Extend QueueManager with our own queue connectors and queue implementations
+     * to send job dispatch events
+     */
+    protected function replaceQueueConnectors()
+    {
+        $this->app->resolving(QueueManager::class, function ($manager) {
+            $manager->addConnector('redis', function () {
+                if (!class_exists('Laravel\Horizon\Connectors\RedisConnector')) {
+                    return new RedisConnector($this->app['redis']);
+                }
+
+                return $this->app->make('Laravel\Horizon\Connectors\RedisConnector');
+            });
+            $manager->addConnector('database', function () {
+                return new DatabaseConnector($this->app['db']);
+            });
+            $manager->addConnector('beanstalkd', function () {
+                return new BeanstalkdConnector();
+            });
+            $manager->addConnector('sqs', function () {
+                return new SqsConnector();
+            });
+        });
+    }
+
+    /**
+     * Replace Queue Worker to send worker start event
+     */
+    protected function replaceQueueWorker()
+    {
+        $this->app->extend('queue.worker', function ($worker) {
+            $isDownForMaintenance = function () {
+                return $this->app->isDownForMaintenance();
+            };
+
+            return new Worker(
+                $this->app['queue'],
+                $this->app['events'],
+                $this->app[ExceptionHandlerContract::class],
+                $isDownForMaintenance
+            );
+        });
     }
 }
